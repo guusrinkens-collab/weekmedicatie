@@ -138,17 +138,17 @@ WM.Medications = (() => {
           <div class="form-row">
             <div class="form-group">
               <label class="form-label">Startdosis</label>
-              <input type="number" name="taperStart" class="form-input" value="${tapering ? tapering.startDose : ''}" min="0" step="0.5" placeholder="bv. 20">
+              <input type="number" name="taperStart" class="form-input" value="${tapering ? tapering.startDose : ''}" min="0" step="0.1" placeholder="bv. 20">
             </div>
             <div class="form-group">
               <label class="form-label">Einddosis</label>
-              <input type="number" name="taperEnd" class="form-input" value="${tapering ? tapering.endDose : ''}" min="0" step="0.5" placeholder="bv. 0">
+              <input type="number" name="taperEnd" class="form-input" value="${tapering ? tapering.endDose : ''}" min="0" step="0.1" placeholder="bv. 0">
             </div>
           </div>
           <div class="form-row">
             <div class="form-group">
               <label class="form-label">Vermindering/stap</label>
-              <input type="number" name="taperStep" class="form-input" value="${tapering ? tapering.reductionStep : ''}" min="0.5" step="0.5" placeholder="bv. 5">
+              <input type="number" name="taperStep" class="form-input" value="${tapering ? tapering.reductionStep : ''}" min="0.1" step="0.1" placeholder="bv. 0.25">
             </div>
             <div class="form-group">
               <label class="form-label">Interval (dagen)</label>
