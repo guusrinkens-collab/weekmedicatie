@@ -133,12 +133,16 @@ WM.Stock = (() => {
       ? `<br><small>Feestdag(en) ingepland: ${alert.upcomingHolidays.join(', ')}</small>` : '';
 
     return `
-      <div class="alert-banner ${cls}" onclick="WM.Medications.editMedication('${alert.med.id}')">
-        <span class="alert-icon">${icon}</span>
-        <div class="alert-text">
+      <div class="alert-banner ${cls}">
+        <span class="alert-icon" onclick="WM.Medications.editMedication('${alert.med.id}')">${icon}</span>
+        <div class="alert-text" onclick="WM.Medications.editMedication('${alert.med.id}')">
           <div class="alert-title">${alert.med.name} — ${alert.message}</div>
           <div class="alert-msg">${alert.orderMessage}${holidayText}</div>
         </div>
+        <button class="btn btn-sm btn-primary"
+            onclick="event.stopPropagation();WM.Medications.quickFillStock('${alert.med.id}')">
+          Bijvullen
+        </button>
       </div>`;
   }
 

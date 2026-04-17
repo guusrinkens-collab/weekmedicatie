@@ -20,8 +20,7 @@ WM.Camera = (() => {
     const html = `
       <div style="text-align:center;">
         <p style="color:var(--text-muted);margin-bottom:20px;font-size:0.9rem;">
-          Maak een foto van het apothekerlabel of upload een afbeelding.
-          De AI leest automatisch de medicatiegegevens.
+          Maak een foto van het apothekerlabel. De AI leest de medicatiegegevens automatisch uit.
         </p>
 
         <label for="camera-input" class="btn btn-primary btn-lg btn-full" style="cursor:pointer;display:flex;gap:10px;justify-content:center;">
@@ -31,7 +30,7 @@ WM.Camera = (() => {
                style="display:none;" onchange="WM.Camera.handleImage(event, '${medId}')">
 
         <p class="form-hint" style="margin-top:16px;">
-          Zorg voor goede belichting en houd het label recht voor de camera.
+          Zorg voor goede belichting en houd het label recht.
         </p>
 
         <div id="scan-preview" style="display:none;margin-top:16px;">
@@ -48,16 +47,13 @@ WM.Camera = (() => {
     const file = event.target.files[0];
     if (!file) return;
 
-    // Preview tonen
     const preview = document.getElementById('scan-preview');
     const img = document.getElementById('scan-img');
     if (preview && img) {
-      const url = URL.createObjectURL(file);
-      img.src = url;
+      img.src = URL.createObjectURL(file);
       preview.style.display = 'block';
     }
 
-    // Base64 converteren
     const base64 = await fileToBase64(file);
     const mediaType = file.type || 'image/jpeg';
 
@@ -66,7 +62,6 @@ WM.Camera = (() => {
     try {
       const result = await scanWithClaude(base64, mediaType);
       hideLoader();
-
       if (result) {
         showScanResult(result, medId);
       } else {
@@ -82,10 +77,7 @@ WM.Camera = (() => {
   function fileToBase64(file) {
     return new Promise((resolve, reject) => {
       const reader = new FileReader();
-      reader.onload = e => {
-        const base64 = e.target.result.split(',')[1];
-        resolve(base64);
-      };
+      reader.onload = e => resolve(e.target.result.split(',')[1]);
       reader.onerror = reject;
       reader.readAsDataURL(file);
     });
@@ -128,14 +120,7 @@ Regels:
         messages: [{
           role: 'user',
           content: [
-            {
-              type: 'image',
-              source: {
-                type: 'base64',
-                media_type: mediaType,
-                data: base64Data
-              }
-            },
+            { type: 'image', source: { type: 'base64', media_type: mediaType, data: base64Data } },
             { type: 'text', text: prompt }
           ]
         }]
@@ -151,13 +136,10 @@ Regels:
     const text = data.content?.[0]?.text;
     if (!text) throw new Error('Leeg antwoord van API');
 
-    // JSON parsen
     try {
-      // Verwijder eventuele markdown code blocks
       const clean = text.replace(/```json?\n?/g, '').replace(/```/g, '').trim();
       return JSON.parse(clean);
     } catch {
-      // Probeer JSON uit tekst te extraheren
       const match = text.match(/\{[\s\S]*\}/);
       if (match) return JSON.parse(match[0]);
       throw new Error('Kon JSON niet parsen uit antwoord');
@@ -169,20 +151,85 @@ Regels:
     const container = document.getElementById('scan-result');
     if (!container) return;
 
+    const rows = [
+      result.name           && { label: 'Naam',         value: result.name },
+      result.dosage         && { label: 'Dosering',     value: result.dosage },
+      result.quantity       && { label: 'Aantal stuks', value: result.quantity },
+      result.usageInstructions && { label: 'Gebruik',   value: result.usageInstructions },
+    ].filter(Boolean);
+
+    const rowsHTML = rows.map(r => `
+      <div class="scan-row">
+        <span class="scan-row-label">${r.label}</span>
+        <span class="scan-row-value">${r.value}</span>
+      </div>`).join('');
+
+    const existingMeds = WM.Data.Medications.all();
+    const resultJSON = JSON.stringify(result).replace(/"/g, '&quot;');
+
+    const stockBtn = existingMeds.length > 0 && result.quantity
+      ? `<button class="btn btn-outline btn-full" style="margin-top:10px;"
+             onclick="WM.Camera.openStockRefill(${resultJSON})">
+           📦 Bijvullen voor bestaand medicijn
+         </button>`
+      : '';
+
     container.innerHTML = `
-      <div class="card" style="text-align:left;">
-        <div class="card-title" style="margin-bottom:12px;color:var(--success);">✓ Label gelezen</div>
-        ${result.name ? `<div class="settings-item" style="margin-bottom:8px;padding:10px 12px;"><div><div style="font-size:0.7rem;color:var(--text-muted);">Naam</div><div style="font-weight:700;">${result.name}</div></div></div>` : ''}
-        ${result.dosage ? `<div class="settings-item" style="margin-bottom:8px;padding:10px 12px;"><div><div style="font-size:0.7rem;color:var(--text-muted);">Dosering</div><div style="font-weight:700;">${result.dosage}</div></div></div>` : ''}
-        ${result.quantity ? `<div class="settings-item" style="margin-bottom:8px;padding:10px 12px;"><div><div style="font-size:0.7rem;color:var(--text-muted);">Verpakkingshoeveelheid</div><div style="font-weight:700;">${result.quantity} stuks</div></div></div>` : ''}
-        ${result.usageInstructions ? `<div class="settings-item" style="margin-bottom:8px;padding:10px 12px;"><div><div style="font-size:0.7rem;color:var(--text-muted);">Gebruiksaanwijzing</div><div style="font-weight:600;font-size:0.85rem;">${result.usageInstructions}</div></div></div>` : ''}
-        ${result.activeIngredient ? `<div class="settings-item" style="margin-bottom:8px;padding:10px 12px;"><div><div style="font-size:0.7rem;color:var(--text-muted);">Werkzame stof</div><div style="font-weight:600;font-size:0.85rem;">${result.activeIngredient}</div></div></div>` : ''}
-        <button class="btn btn-primary btn-full" onclick="WM.Camera.applyResult(${JSON.stringify(result).replace(/"/g, '&quot;')}, '${medId}')">
-          Gebruik deze gegevens
-        </button>
+      <div class="scan-result-card">
+        <div class="scan-result-header">✓ Label gelezen</div>
+        ${rowsHTML}
+        <div style="margin-top:16px;">
+          <button class="btn btn-primary btn-full"
+              onclick="WM.Camera.applyResult(${resultJSON}, '${medId}')">
+            💊 Nieuw medicijn aanmaken
+          </button>
+          ${stockBtn}
+        </div>
       </div>`;
   }
 
+  // ── Voorraad bijvullen voor bestaand medicijn ─────────────
+  function openStockRefill(result) {
+    const meds = WM.Data.Medications.all();
+    const options = meds.map(m =>
+      `<option value="${m.id}">${m.name} — ${m.dosage} (nu: ${m.stock ?? '?'})</option>`
+    ).join('');
+
+    closeModal();
+    setTimeout(() => {
+      openModal('Voorraad bijvullen', `
+        <div>
+          <div class="scan-row" style="margin-bottom:16px;">
+            <span class="scan-row-label">Gescand</span>
+            <span class="scan-row-value">${result.name || '?'}${result.quantity ? ' — ' + result.quantity + ' st.' : ''}</span>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Kies medicijn</label>
+            <select class="form-select" id="stock-med-select">${options}</select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Aantal toe te voegen</label>
+            <input type="number" class="form-input" id="stock-add-amount"
+                   value="${result.quantity || ''}" min="1" step="1" placeholder="aantal pillen">
+          </div>
+          <button class="btn btn-primary btn-full" onclick="WM.Camera.confirmStockRefill()">
+            ✓ Bijvullen
+          </button>
+        </div>`);
+    }, 300);
+  }
+
+  function confirmStockRefill() {
+    const medId  = document.getElementById('stock-med-select')?.value;
+    const amount = parseInt(document.getElementById('stock-add-amount')?.value);
+    if (!medId || !amount || amount <= 0) { toast('Vul een geldig aantal in', 'warning'); return; }
+    WM.Data.Medications.updateStock(medId, amount);
+    closeModal();
+    toast(`Voorraad bijgevuld met ${amount} stuks`, 'success');
+    WM.App.refreshPage();
+  }
+
+  // ── Scan toepassen op medicijnformulier ───────────────────
   function applyResult(result, medId) {
     closeModal();
     setTimeout(() => {
@@ -195,5 +242,5 @@ Regels:
     }, 300);
   }
 
-  return { openScanner, handleImage, applyResult };
+  return { openScanner, handleImage, applyResult, openStockRefill, confirmStockRefill };
 })();

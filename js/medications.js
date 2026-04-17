@@ -54,7 +54,12 @@ WM.Medications = (() => {
           <div class="med-moments">${moments}</div>
           ${taperBadge}
         </div>
-        ${WM.Stock.renderStockInfo(med)}
+        <div class="med-right">
+          ${WM.Stock.renderStockInfo(med)}
+          <button class="btn btn-sm btn-outline refill-btn"
+              onclick="event.stopPropagation();WM.Medications.quickFillStock('${med.id}')"
+              title="Voorraad bijvullen">＋ Bijvullen</button>
+        </div>
       </div>`;
   }
 
@@ -220,6 +225,37 @@ WM.Medications = (() => {
     });
   }
 
+  // ── Snel bijvullen ────────────────────────────────────────
+  function quickFillStock(medId) {
+    const med = MData.get(medId);
+    if (!med) return;
+    openModal(`Bijvullen: ${med.name}`, `
+      <div>
+        <div class="scan-row" style="margin-bottom:16px;">
+          <span class="scan-row-label">Huidige voorraad</span>
+          <span class="scan-row-value">${med.stock ?? '–'} stuks</span>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Aantal pillen toevoegen</label>
+          <input type="number" class="form-input" id="quick-stock-input"
+                 value="" min="1" step="1" placeholder="bv. 30" autofocus>
+        </div>
+        <button class="btn btn-primary btn-full"
+            onclick="WM.Medications.confirmQuickStock('${medId}')">
+          ✓ Bijvullen
+        </button>
+      </div>`);
+  }
+
+  function confirmQuickStock(medId) {
+    const amount = parseInt(document.getElementById('quick-stock-input')?.value);
+    if (!amount || amount <= 0) { toast('Vul een geldig aantal in', 'warning'); return; }
+    WM.Data.Medications.updateStock(medId, amount);
+    closeModal();
+    toast(`Voorraad bijgevuld met ${amount} stuks`, 'success');
+    WM.App.refreshPage();
+  }
+
   // Formulier invullen vanuit scan
   function prefillForm(data) {
     const form = document.getElementById('med-form');
@@ -310,5 +346,5 @@ WM.Medications = (() => {
     });
   }
 
-  return { render, renderMedCard, addMedication, editMedication, prefillForm, deleteMedication, toggleTaperingForm, updateChip };
+  return { render, renderMedCard, addMedication, editMedication, prefillForm, deleteMedication, toggleTaperingForm, updateChip, quickFillStock, confirmQuickStock };
 })();

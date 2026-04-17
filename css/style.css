@@ -421,11 +421,13 @@ a { color: var(--primary-light); text-decoration: none; }
 .moment-dot.ochtend { background: var(--moment-ochtend); }
 .moment-dot.middag  { background: var(--moment-middag); }
 .moment-dot.avond   { background: var(--moment-avond); }
-.med-stock { text-align: right; flex-shrink: 0; }
+.med-right { display: flex; flex-direction: column; align-items: flex-end; gap: 8px; flex-shrink: 0; }
+.med-stock { text-align: right; }
 .stock-count { font-size: 1.1rem; font-weight: 700; }
 .stock-days { font-size: 0.75rem; color: var(--text-muted); }
 .stock-warn { color: var(--warning); }
 .stock-danger { color: var(--danger); }
+.refill-btn { font-size: 0.72rem; padding: 5px 10px; white-space: nowrap; }
 
 /* Voorraadwaarschuwing */
 .alert-banner {
@@ -436,17 +438,43 @@ a { color: var(--primary-light); text-decoration: none; }
   margin-bottom: 12px;
   display: flex;
   gap: 12px;
-  align-items: flex-start;
+  align-items: center;
 }
 .alert-banner.danger {
   background: rgba(239,68,68,0.12);
   border-color: rgba(239,68,68,0.3);
 }
-.alert-icon { font-size: 1.2rem; flex-shrink: 0; }
-.alert-text { flex: 1; }
+.alert-icon { font-size: 1.2rem; flex-shrink: 0; cursor: pointer; }
+.alert-text { flex: 1; cursor: pointer; }
 .alert-title { font-weight: 700; font-size: 0.9rem; color: var(--warning); }
 .alert-banner.danger .alert-title { color: var(--danger); }
 .alert-msg { font-size: 0.8rem; color: var(--text-muted); margin-top: 2px; }
+
+/* Scan resultaat */
+.scan-result-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 16px;
+  text-align: left;
+}
+.scan-result-header {
+  font-weight: 700;
+  color: var(--success);
+  margin-bottom: 12px;
+  font-size: 0.95rem;
+}
+.scan-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 12px;
+  padding: 8px 0;
+  border-bottom: 1px solid var(--border);
+}
+.scan-row:last-of-type { border-bottom: none; }
+.scan-row-label { font-size: 0.75rem; color: var(--text-muted); flex-shrink: 0; }
+.scan-row-value { font-weight: 700; font-size: 0.9rem; text-align: right; }
 
 /* ── Badges / Pills ──────────────────────────────────────── */
 .badge {
