@@ -33,6 +33,9 @@ WM.Schedule = (() => {
     const pct = totalIntakes > 0 ? Math.round(doneIntakes / totalIntakes * 100) : 0;
 
     let html = `
+      <div style="width:100%;border-radius:16px;overflow:hidden;margin-bottom:16px;max-height:200px;">
+        <img src="assets/today-banner.jpg" alt="Weekmedicatie" style="width:100%;height:200px;object-fit:cover;object-position:center top;display:block;">
+      </div>
       <p class="today-date">${formatDate(today, 'long')}</p>
 
       ${alerts.length > 0 ? alerts.slice(0, 3).map(a => WM.Stock.renderAlertBanner(a)).join('') : ''}
