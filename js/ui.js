@@ -31,6 +31,7 @@ WM.UI = (() => {
     if (!overlay) return;
 
     titleEl.textContent = title;
+    bodyEl.innerHTML = '';
     bodyEl.innerHTML = bodyHTML;
 
     // Opties

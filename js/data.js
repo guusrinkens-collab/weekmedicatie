@@ -30,11 +30,19 @@ WM.Data = (() => {
     try {
       const v = localStorage.getItem(key);
       return v !== null ? JSON.parse(v) : fallback;
-    } catch { return fallback; }
+    } catch {
+      console.warn(`[Weekmedicatie] Ongeldige data in ${key}, standaardwaarden worden gebruikt.`);
+      return fallback;
+    }
   }
 
   function save(key, value) {
-    localStorage.setItem(key, JSON.stringify(value));
+    try {
+      localStorage.setItem(key, JSON.stringify(value));
+    } catch (e) {
+      console.error(`[Weekmedicatie] Opslaan mislukt voor ${key}:`, e);
+      if (window.WM?.UI?.toast) WM.UI.toast('Opslaan mislukt: geheugen vol?', 'error');
+    }
   }
 
   // ── Medicijnen ────────────────────────────────────────────

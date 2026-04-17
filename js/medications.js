@@ -292,10 +292,13 @@ WM.Medications = (() => {
     if (!data.dosage || !data.dosage.trim()) { toast('Dosering is verplicht', 'warning'); return; }
     if (!data.moments || data.moments.length === 0) { toast('Kies minstens één innametijdstip', 'warning'); return; }
 
-    const pillsPerDose = parseFloat(data.pillsPerDose) || 1;
+    const pillsPerDose = Math.max(0.5, parseFloat(data.pillsPerDose) || 1);
     const moments = Array.isArray(data.moments) ? data.moments : [data.moments];
-    const dailyUsage = parseFloat(data.dailyUsage) || pillsPerDose * moments.length;
+    const dailyUsage = Math.max(0, parseFloat(data.dailyUsage) || pillsPerDose * moments.length);
     const isTapering = form.querySelector('#tapering-toggle').checked;
+
+    const rawStock = data.stock !== '' ? parseInt(data.stock) : null;
+    const stock = rawStock !== null ? Math.max(0, rawStock) : null;
 
     const medData = {
       id: existingId || undefined,
@@ -303,7 +306,7 @@ WM.Medications = (() => {
       dosage: data.dosage.trim(),
       moments,
       pillsPerDose,
-      stock: data.stock !== '' ? parseInt(data.stock) : null,
+      stock,
       dailyUsage,
       isTapering
     };

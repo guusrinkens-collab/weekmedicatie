@@ -7,6 +7,7 @@ WM.Notifications = (() => {
   const { Settings, Medications, Schedule: SData } = WM.Data;
 
   let timers = [];
+  let midnightTimer = null;
 
   // ── Toestemming vragen ────────────────────────────────────
   async function requestPermission() {
@@ -94,15 +95,17 @@ WM.Notifications = (() => {
 
   // ── Stel in middernacht-reset in ─────────────────────────
   function scheduleMidnightReset() {
+    if (midnightTimer) clearTimeout(midnightTimer);
     const now = new Date();
     const midnight = new Date();
     midnight.setDate(midnight.getDate() + 1);
     midnight.setHours(0, 1, 0, 0); // 00:01
     const delay = midnight - now;
 
-    setTimeout(() => {
+    midnightTimer = setTimeout(() => {
+      midnightTimer = null;
       scheduleToday();
-      scheduleMidnightReset(); // Volgende dag opnieuw instellen
+      scheduleMidnightReset();
     }, delay);
   }
 
@@ -183,6 +186,7 @@ WM.Notifications = (() => {
       Settings.update({ notifications: false });
       timers.forEach(clearTimeout);
       timers = [];
+      if (midnightTimer) { clearTimeout(midnightTimer); midnightTimer = null; }
       WM.UI.toast('Herinneringen uitgeschakeld', 'info');
     }
   }

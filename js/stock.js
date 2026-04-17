@@ -9,7 +9,7 @@ WM.Stock = (() => {
 
   // Bereken dagen voorraad resterend
   function daysRemaining(med) {
-    if (!med.stock || !med.dailyUsage || med.dailyUsage <= 0) return Infinity;
+    if (med.stock === null || med.stock === undefined || !med.dailyUsage || med.dailyUsage <= 0) return Infinity;
     return Math.floor(med.stock / med.dailyUsage);
   }
 
