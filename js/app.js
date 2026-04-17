@@ -1,0 +1,269 @@
+// ============================================================
+// app.js — Hoofdcoördinator: router, navigatie, initialisatie
+// ============================================================
+window.WM = window.WM || {};
+
+WM.App = (() => {
+  // ── Paginadefinities ──────────────────────────────────────
+  const PAGES = {
+    vandaag:     { render: () => WM.Schedule.render(),    title: 'Vandaag',         navKey: 'vandaag' },
+    medicatie:   { render: () => WM.Medications.render(), title: 'Medicatie',       navKey: 'medicatie' },
+    geschiedenis:{ render: () => WM.History.render(),     title: 'Geschiedenis',    navKey: 'geschiedenis' },
+    meer:        { render: () => renderMeer(),             title: 'Meer',            navKey: 'meer' },
+    thema:       { render: () => WM.Theme.render(),       title: 'Thema\'s',        navKey: 'meer' },
+    contacten:   { render: () => WM.Contacts.render(),    title: 'Contacten',       navKey: 'meer' },
+    afbouw:      { render: () => WM.Tapering.render(),    title: 'Afbouwschema\'s', navKey: 'meer' },
+    welzijn:     { render: () => WM.Wellbeing.render(),   title: 'Welzijnslog',     navKey: 'meer' },
+    instellingen:{ render: () => renderSettings(),        title: 'Instellingen',    navKey: 'meer' }
+  };
+
+  const NAV_TABS = ['vandaag', 'medicatie', 'geschiedenis', 'meer'];
+  let _currentPage = 'vandaag';
+
+  // ── Meer-pagina renderen ──────────────────────────────────
+  function renderMeer() {
+    const meds = WM.Data.Medications.all();
+    const alerts = WM.Stock.getAlerts();
+
+    return `
+      ${alerts.length > 0 ? `
+        <div class="section-title">⚠️ Waarschuwingen (${alerts.length})</div>
+        ${alerts.slice(0,2).map(a => WM.Stock.renderAlertBanner(a)).join('')}
+      ` : ''}
+
+      <div class="section-title">Functies</div>
+      <div class="meer-grid">
+        <div class="meer-card" onclick="WM.App.navigate('afbouw')">
+          <div class="meer-card-icon" style="background:rgba(139,92,246,0.15);">⬇️</div>
+          <div class="meer-card-label">Afbouwschema's</div>
+          <div class="meer-card-sub">${WM.Data.Tapering.all().filter(t=>t.active).length} actief</div>
+        </div>
+        <div class="meer-card" onclick="WM.App.navigate('welzijn')">
+          <div class="meer-card-icon" style="background:rgba(236,72,153,0.15);">❤️</div>
+          <div class="meer-card-label">Welzijnslog</div>
+          <div class="meer-card-sub">Dagelijkse stemming</div>
+        </div>
+        <div class="meer-card" onclick="WM.App.navigate('contacten')">
+          <div class="meer-card-icon" style="background:rgba(59,130,246,0.15);">📞</div>
+          <div class="meer-card-label">Contacten</div>
+          <div class="meer-card-sub">Arts & apotheek</div>
+        </div>
+        <div class="meer-card" onclick="WM.Export.exportPDF()">
+          <div class="meer-card-icon" style="background:rgba(16,185,129,0.15);">📄</div>
+          <div class="meer-card-label">Export PDF</div>
+          <div class="meer-card-sub">Weekoverzicht</div>
+        </div>
+        <div class="meer-card" onclick="WM.App.navigate('thema')">
+          <div class="meer-card-icon" style="background:rgba(245,158,11,0.15);">🎨</div>
+          <div class="meer-card-label">Thema's</div>
+          <div class="meer-card-sub">Kleuraanpassing</div>
+        </div>
+        <div class="meer-card" onclick="WM.App.navigate('instellingen')">
+          <div class="meer-card-icon" style="background:rgba(107,114,128,0.15);">⚙️</div>
+          <div class="meer-card-label">Instellingen</div>
+          <div class="meer-card-sub">API & meldingen</div>
+        </div>
+      </div>
+
+      <div class="section-title">Over</div>
+      <div class="card">
+        <div style="display:flex;align-items:center;gap:12px;">
+          <span style="font-size:2rem;">💊</span>
+          <div>
+            <div style="font-weight:700;">Weekmedicatie</div>
+            <div style="font-size:0.8rem;color:var(--text-muted);">Versie 1.0 · Offline beschikbaar</div>
+            <div style="font-size:0.75rem;color:var(--text-dim);margin-top:4px;">${meds.length} medicijn${meds.length !== 1 ? 'en' : ''} opgeslagen</div>
+          </div>
+        </div>
+      </div>`;
+  }
+
+  // ── Instellingenpagina ────────────────────────────────────
+  function renderSettings() {
+    const settings = WM.Data.Settings.get();
+
+    return `
+      <div class="subpage-header">
+        ${WM.UI.backButton('meer')}
+        <h2 class="subpage-title">Instellingen</h2>
+      </div>
+
+      <div class="section-title">🤖 Claude API</div>
+      <div class="card">
+        <p style="font-size:0.82rem;color:var(--text-muted);margin-bottom:12px;">
+          Vereist voor het scannen van apothekerlabels.
+          Uw API-sleutel wordt alleen lokaal opgeslagen.
+        </p>
+        <div class="form-group">
+          <label class="form-label">API-sleutel</label>
+          <input type="password" id="api-key-input" class="form-input"
+                 value="${settings.apiKey || ''}"
+                 placeholder="sk-ant-api03-…"
+                 autocomplete="new-password">
+        </div>
+        <div style="display:flex;gap:8px;">
+          <button class="btn btn-primary" onclick="WM.App.saveApiKey()">Opslaan</button>
+          ${settings.apiKey ? `<button class="btn btn-danger btn-sm" onclick="WM.App.clearApiKey()">Verwijderen</button>` : ''}
+        </div>
+        <p class="form-hint" style="margin-top:8px;">
+          Vraag een API-sleutel aan op console.anthropic.com
+        </p>
+      </div>
+
+      ${WM.Notifications.renderSettingsSection()}
+
+      <div class="section-title">📊 Drempelwaarden</div>
+      <div class="card">
+        <div class="form-group">
+          <label class="form-label">Waarschuwing lage voorraad (dagen)</label>
+          <input type="number" id="low-stock-days" class="form-input"
+                 value="${settings.lowStockDays || 7}" min="1" max="30">
+          <p class="form-hint">Waarschuw als voorraad minder dan X dagen meegaat</p>
+        </div>
+        <button class="btn btn-outline" onclick="WM.App.saveThresholds()">Opslaan</button>
+      </div>
+
+      <div class="section-title">🗑️ Gegevens</div>
+      <div class="card">
+        <div class="settings-item" style="margin-bottom:8px;">
+          <div class="settings-item-info">
+            <div class="settings-item-label">Alle gegevens wissen</div>
+            <div class="settings-item-sub">Verwijdert alle medicijnen, innames en instellingen</div>
+          </div>
+          <button class="btn btn-danger btn-sm" onclick="WM.App.clearAllData()">Wissen</button>
+        </div>
+        <div class="settings-item">
+          <div class="settings-item-info">
+            <div class="settings-item-label">App vernieuwen</div>
+            <div class="settings-item-sub">Herlaad de app (behoudt gegevens)</div>
+          </div>
+          <button class="btn btn-outline btn-sm" onclick="location.reload()">Vernieuwen</button>
+        </div>
+      </div>`;
+  }
+
+  // ── Navigatie ─────────────────────────────────────────────
+  function navigate(pageKey) {
+    if (!PAGES[pageKey]) return;
+    _currentPage = pageKey;
+
+    const page = PAGES[pageKey];
+    const contentEl = document.getElementById('page-content');
+    if (!contentEl) return;
+
+    // Render pagina
+    contentEl.innerHTML = page.render();
+    contentEl.classList.add('slide-in');
+    setTimeout(() => contentEl.classList.remove('slide-in'), 300);
+
+    // Nav-tabs updaten
+    const navKey = page.navKey || pageKey;
+    document.querySelectorAll('.nav-btn').forEach(btn => {
+      btn.classList.toggle('active', btn.dataset.page === navKey);
+    });
+
+    // Header-titel
+    const titleEl = document.getElementById('app-title');
+    if (titleEl) titleEl.textContent = page.title;
+
+    // Page-specific initialisaties
+    if (pageKey === 'thema') {
+      setTimeout(() => WM.Theme.initColorPickers(), 100);
+    }
+
+    // Scroll naar boven
+    contentEl.scrollTop = 0;
+  }
+
+  function currentPage() { return _currentPage; }
+
+  function refreshPage() { navigate(_currentPage); }
+
+  // ── Instellingen-acties ───────────────────────────────────
+  function saveApiKey() {
+    const key = document.getElementById('api-key-input')?.value?.trim();
+    WM.Data.Settings.update({ apiKey: key || '' });
+    WM.UI.toast(key ? 'API-sleutel opgeslagen' : 'API-sleutel geleegd', 'success');
+    refreshPage();
+  }
+
+  function clearApiKey() {
+    WM.UI.confirmDialog('API-sleutel verwijderen?', () => {
+      WM.Data.Settings.update({ apiKey: '' });
+      WM.UI.toast('API-sleutel verwijderd', 'success');
+      refreshPage();
+    });
+  }
+
+  function saveThresholds() {
+    const days = parseInt(document.getElementById('low-stock-days')?.value) || 7;
+    WM.Data.Settings.update({ lowStockDays: days });
+    WM.UI.toast('Drempelwaarde opgeslagen', 'success');
+  }
+
+  function clearAllData() {
+    WM.UI.confirmDialog(
+      'Weet u zeker dat u ALLE gegevens wilt wissen? Dit kan niet ongedaan worden gemaakt.',
+      () => {
+        Object.keys(localStorage).filter(k => k.startsWith('wm_')).forEach(k => localStorage.removeItem(k));
+        WM.UI.toast('Alle gegevens gewist', 'success');
+        setTimeout(() => location.reload(), 1000);
+      }
+    );
+  }
+
+  // ── Initialisatie ─────────────────────────────────────────
+  function init() {
+    // Thema laden
+    WM.Theme.loadSavedTheme();
+
+    // Middernacht-reset controleren
+    WM.Schedule.checkMidnightReset();
+
+    // Notificaties starten
+    WM.Notifications.init();
+
+    // Modal sluiten via overlay-klik
+    document.getElementById('modal-overlay')?.addEventListener('click', e => {
+      if (e.target === document.getElementById('modal-overlay')) WM.UI.closeModal();
+    });
+    document.querySelector('.modal-close')?.addEventListener('click', WM.UI.closeModal);
+
+    // Bottom-nav koppelen
+    document.querySelectorAll('.nav-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const page = btn.dataset.page;
+        navigate(page);
+      });
+    });
+
+    // FAB koppelen per pagina
+    document.getElementById('fab-main')?.addEventListener('click', () => {
+      if (_currentPage === 'medicatie') WM.Medications.addMedication();
+      else if (_currentPage === 'vandaag') WM.App.navigate('medicatie');
+    });
+
+    // Initiële pagina laden
+    navigate('vandaag');
+
+    // Service Worker registreren
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('/service-worker.js').catch(err => {
+        console.warn('SW registratie mislukt:', err);
+      });
+    }
+
+    // Online/offline melding
+    window.addEventListener('online', () => WM.UI.toast('Verbinding hersteld', 'success'));
+    window.addEventListener('offline', () => WM.UI.toast('Geen internetverbinding – app werkt offline', 'warning'));
+
+    console.log('💊 Weekmedicatie geladen');
+  }
+
+  return { navigate, currentPage, refreshPage, saveApiKey, clearApiKey, saveThresholds, clearAllData, init, renderMeer };
+})();
+
+// ── App starten zodra DOM klaar is ────────────────────────
+document.addEventListener('DOMContentLoaded', () => {
+  WM.App.init();
+});

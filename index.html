@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="nl" data-theme="purple">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <meta name="description" content="Dagelijks medicatiebeheer met voorraad, afbouwschema's en apotheekherinneringen">
+  <meta name="theme-color" content="#6c63ff">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Medicatie">
+
+  <title>Weekmedicatie</title>
+
+  <!-- PWA manifest -->
+  <link rel="manifest" href="/manifest.json">
+
+  <!-- Iconen -->
+  <link rel="icon" href="/icons/icon.svg" type="image/svg+xml">
+  <link rel="apple-touch-icon" href="/icons/icon-192.png">
+
+  <!-- Stijlen -->
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+
+<div id="app">
+
+  <!-- ── App Header ─────────────────────────────────────── -->
+  <header class="app-header">
+    <h1 id="app-title">Vandaag</h1>
+    <div class="header-right">
+      <button class="icon-btn" title="Medicijn toevoegen"
+              onclick="if(WM.App.currentPage()==='medicatie')WM.Medications.addMedication();else WM.App.navigate('medicatie')">
+        <span class="icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+            <line x1="12" y1="5" x2="12" y2="19"/>
+            <line x1="5" y1="12" x2="19" y2="12"/>
+          </svg>
+        </span>
+      </button>
+      <button class="icon-btn" title="Label scannen" onclick="WM.Camera.openScanner()">
+        <span class="icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/>
+            <circle cx="12" cy="13" r="4"/>
+          </svg>
+        </span>
+      </button>
+    </div>
+  </header>
+
+  <!-- ── Paginainhoud ───────────────────────────────────── -->
+  <main class="pages">
+    <div id="page-content" class="page active">
+      <!-- Dynamisch ingevuld door app.js -->
+      <div style="display:flex;align-items:center;justify-content:center;height:100%;opacity:0.4;">
+        <div class="loader-spinner"></div>
+      </div>
+    </div>
+  </main>
+
+  <!-- ── Bottom Navigation ──────────────────────────────── -->
+  <nav class="bottom-nav">
+    <button class="nav-btn active" data-page="vandaag">
+      <span class="nav-icon">&#128138;</span>
+      <span class="nav-label">Vandaag</span>
+    </button>
+    <button class="nav-btn" data-page="medicatie">
+      <span class="nav-icon">&#128203;</span>
+      <span class="nav-label">Medicatie</span>
+    </button>
+    <button class="nav-btn" data-page="geschiedenis">
+      <span class="nav-icon">&#128202;</span>
+      <span class="nav-label">Geschiedenis</span>
+    </button>
+    <button class="nav-btn" data-page="meer">
+      <span class="nav-icon">&#9881;&#65039;</span>
+      <span class="nav-label">Meer</span>
+    </button>
+  </nav>
+
+</div><!-- /#app -->
+
+<!-- ── Modal ──────────────────────────────────────────────── -->
+<div id="modal-overlay" class="modal-overlay hidden">
+  <div id="modal" class="modal">
+    <div class="modal-header">
+      <h2 id="modal-title">&#8230;</h2>
+      <button class="modal-close" onclick="WM.UI.closeModal()">&#x2715;</button>
+    </div>
+    <div id="modal-body"></div>
+  </div>
+</div>
+
+<!-- ── Toast-container ────────────────────────────────────── -->
+<div id="toast-container"></div>
+
+<!-- ── Scripts ─────────────────────────────────────────────── -->
+<script src="/js/data.js"></script>
+<script src="/js/holidays.js"></script>
+<script src="/js/ui.js"></script>
+<script src="/js/stock.js"></script>
+<script src="/js/tapering.js"></script>
+<script src="/js/schedule.js"></script>
+<script src="/js/medications.js"></script>
+<script src="/js/theme.js"></script>
+<script src="/js/camera.js"></script>
+<script src="/js/notifications.js"></script>
+<script src="/js/history.js"></script>
+<script src="/js/wellbeing.js"></script>
+<script src="/js/contacts.js"></script>
+<script src="/js/export.js"></script>
+<script src="/js/app.js"></script>
+
+<script>
+  // Welkomstscherm bij eerste gebruik
+  (function() {
+    if (!localStorage.getItem('wm_welcomed') && !JSON.parse(localStorage.getItem('wm_medications') || '[]').length) {
+      var ws = document.createElement('div');
+      ws.id = 'welcome-screen';
+      ws.style.cssText = 'position:fixed;inset:0;background:var(--bg);z-index:500;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:32px;text-align:center;';
+      ws.innerHTML = '<div style="font-size:4rem;margin-bottom:16px;">&#128138;</div>'
+        + '<h1 style="font-size:1.8rem;font-weight:800;background:linear-gradient(135deg,var(--primary-light),var(--secondary));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;margin-bottom:8px;">Weekmedicatie</h1>'
+        + '<p style="color:var(--text-muted);margin-bottom:32px;max-width:300px;line-height:1.6;">Uw persoonlijke medicatie-assistent. Bijhouden, beheren en nooit meer vergeten.</p>'
+        + '<div style="display:flex;flex-direction:column;gap:12px;width:100%;max-width:300px;">'
+        + '<button class="btn btn-primary btn-lg" onclick="WM.App.navigate(\'medicatie\');setTimeout(()=>WM.Medications.addMedication(),100);closeWelcome()">&#128138; Eerste medicijn toevoegen</button>'
+        + '<button class="btn btn-outline" onclick="closeWelcome()">Later instellen</button>'
+        + '</div>'
+        + '<p style="margin-top:24px;font-size:0.72rem;color:var(--text-dim);">Alle gegevens worden alleen op uw apparaat opgeslagen.</p>';
+      document.body.appendChild(ws);
+    }
+  })();
+
+  function closeWelcome() {
+    var el = document.getElementById('welcome-screen');
+    if (el) {
+      el.style.opacity = '0';
+      el.style.transition = 'opacity 0.5s';
+      setTimeout(function() { if(el.parentNode) el.parentNode.removeChild(el); }, 500);
+    }
+    localStorage.setItem('wm_welcomed', '1');
+  }
+</script>
+
+<script>
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', function() {
+      navigator.serviceWorker.register('/service-worker.js')
+        .catch(function(err) { console.warn('Service worker registratie mislukt:', err); });
+    });
+  }
+</script>
+
+</body>
+</html>
