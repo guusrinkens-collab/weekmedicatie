@@ -1,25 +1,26 @@
-const CACHE_NAME = 'weekmedicatie-v1';
+const CACHE_NAME = 'weekmedicatie-v2';
+const BASE = self.registration.scope;
 const ASSETS = [
-  '/',
-  '/index.html',
-  '/manifest.json',
-  '/icons/icon.svg',
-  '/css/style.css',
-  '/js/data.js',
-  '/js/holidays.js',
-  '/js/ui.js',
-  '/js/stock.js',
-  '/js/tapering.js',
-  '/js/schedule.js',
-  '/js/medications.js',
-  '/js/theme.js',
-  '/js/camera.js',
-  '/js/notifications.js',
-  '/js/history.js',
-  '/js/wellbeing.js',
-  '/js/contacts.js',
-  '/js/export.js',
-  '/js/app.js'
+  BASE,
+  BASE + 'index.html',
+  BASE + 'manifest.json',
+  BASE + 'icons/icon.svg',
+  BASE + 'css/style.css',
+  BASE + 'js/data.js',
+  BASE + 'js/holidays.js',
+  BASE + 'js/ui.js',
+  BASE + 'js/stock.js',
+  BASE + 'js/tapering.js',
+  BASE + 'js/schedule.js',
+  BASE + 'js/medications.js',
+  BASE + 'js/theme.js',
+  BASE + 'js/camera.js',
+  BASE + 'js/notifications.js',
+  BASE + 'js/history.js',
+  BASE + 'js/wellbeing.js',
+  BASE + 'js/contacts.js',
+  BASE + 'js/export.js',
+  BASE + 'js/app.js'
 ];
 
 self.addEventListener('install', e => {
