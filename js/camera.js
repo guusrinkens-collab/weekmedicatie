@@ -185,16 +185,14 @@ Regels:
 
   function applyResult(result, medId) {
     closeModal();
-
-    if (medId) {
-      // Bewerk bestaand medicijn
-      WM.Medications.editMedication(medId);
-      setTimeout(() => WM.Medications.prefillForm(result), 400);
-    } else {
-      // Nieuw medicijn
-      WM.Medications.addMedication();
-      setTimeout(() => WM.Medications.prefillForm(result), 400);
-    }
+    setTimeout(() => {
+      if (medId) {
+        WM.Medications.editMedication(medId);
+      } else {
+        WM.Medications.addMedication();
+      }
+      setTimeout(() => WM.Medications.prefillForm(result), 300);
+    }, 300);
   }
 
   return { openScanner, handleImage, applyResult };
