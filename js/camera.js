@@ -98,17 +98,21 @@ WM.Camera = (() => {
 
     if (!apiKey) throw new Error('Geen API-sleutel ingesteld');
 
-    const prompt = `Analyseer dit apothekerlabel en extraheer de volgende informatie.
-Geef de antwoord ALLEEN als JSON (geen uitleg, geen markdown):
+    const prompt = `Analyseer dit apothekerlabel van een Nederlandse apotheek en extraheer de volgende informatie.
+Geef het antwoord ALLEEN als JSON (geen uitleg, geen markdown, geen code block):
 {
-  "name": "naam van het medicijn",
-  "dosage": "dosering inclusief eenheid (bv. '50mg')",
+  "name": "alleen de merknaam of generieke naam van het medicijn (bv. 'Metoprolol' of 'Losartan'), NIET de dosering of fabrikant",
+  "dosage": "alleen de sterkte per tablet/capsule (bv. '50mg' of '10mg/ml'), NIET de inname-instructies",
   "quantity": 30,
-  "usageInstructions": "inname-instructies (bv. '1 tablet per dag, ochtend')",
-  "activeIngredient": "werkzame stof indien aanwezig"
+  "usageInstructions": "hoe en wanneer innemen (bv. '1 tablet per dag, ochtend bij het opstaan')",
+  "activeIngredient": "werkzame stof indien apart vermeld"
 }
 
-Als een veld niet leesbaar is op het label, gebruik dan null voor dat veld.`;
+Regels:
+- name: alleen de medicijnnaam, maximaal 3 woorden
+- dosage: alleen getal + eenheid (mg, ml, mcg, IE), geen instructies
+- quantity: alleen het getal (integer), of null
+- Als een veld niet leesbaar is, gebruik null`;
 
     const response = await fetch('https://api.anthropic.com/v1/messages', {
       method: 'POST',
@@ -185,11 +189,11 @@ Als een veld niet leesbaar is op het label, gebruik dan null voor dat veld.`;
     if (medId) {
       // Bewerk bestaand medicijn
       WM.Medications.editMedication(medId);
-      setTimeout(() => WM.Medications.prefillForm(result), 100);
+      setTimeout(() => WM.Medications.prefillForm(result), 400);
     } else {
       // Nieuw medicijn
       WM.Medications.addMedication();
-      setTimeout(() => WM.Medications.prefillForm(result), 100);
+      setTimeout(() => WM.Medications.prefillForm(result), 400);
     }
   }
 
