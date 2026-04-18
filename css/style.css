@@ -153,7 +153,8 @@ a { color: var(--primary-light); text-decoration: none; }
   background: var(--primary-light);
   border-radius: 0 0 4px 4px;
 }
-.nav-icon { font-size: 1.5rem; line-height: 1; }
+.nav-icon { display: flex; align-items: center; justify-content: center; }
+.nav-icon svg { width: 22px; height: 22px; }
 .nav-label { font-size: 0.65rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; }
 
 /* ── Kaarten ─────────────────────────────────────────────── */
@@ -346,7 +347,7 @@ a { color: var(--primary-light); text-decoration: none; }
 }
 .intake-card.taken .intake-name { text-decoration: line-through; }
 .intake-check {
-  width: 28px; height: 28px;
+  width: 44px; height: 44px;
   border-radius: 50%;
   border: 2px solid var(--border);
   display: flex; align-items: center; justify-content: center;
@@ -358,7 +359,7 @@ a { color: var(--primary-light); text-decoration: none; }
   border-color: var(--success);
   color: white;
 }
-.intake-check svg { width: 14px; height: 14px; }
+.intake-check svg { width: 20px; height: 20px; }
 .intake-name { font-weight: 600; font-size: 0.95rem; }
 .intake-dosage { font-size: 0.8rem; color: var(--text-muted); }
 .intake-meta { margin-left: auto; text-align: right; }
@@ -677,6 +678,39 @@ a { color: var(--primary-light); text-decoration: none; }
 .empty-icon { font-size: 3rem; }
 .empty-msg { font-weight: 600; font-size: 1rem; color: var(--text-muted); }
 .empty-sub { font-size: 0.85rem; color: var(--text-dim); }
+
+/* ── Sticky progress strip (vandaag) ────────────────────── */
+.sticky-progress {
+  position: sticky;
+  top: 0;
+  z-index: 5;
+  height: 4px;
+  background: var(--bg-card2);
+  margin: 0 -16px 12px;
+}
+.sticky-progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--primary), var(--secondary));
+  transition: width 0.5s ease;
+}
+.sticky-progress.complete .sticky-progress-fill {
+  background: var(--success);
+}
+
+/* ── Celebratie-animatie ─────────────────────────────────── */
+@keyframes celebrate-pop {
+  0%   { transform: scale(1); }
+  40%  { transform: scale(1.18); }
+  70%  { transform: scale(0.94); }
+  100% { transform: scale(1); }
+}
+@keyframes celebrate-glow {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(16,185,129,0); }
+  50%       { box-shadow: 0 0 0 12px rgba(16,185,129,0.25); }
+}
+.celebrate {
+  animation: celebrate-pop 0.5s ease, celebrate-glow 1s ease 0.5s;
+}
 
 /* ── Vandaag-pagina ──────────────────────────────────────── */
 

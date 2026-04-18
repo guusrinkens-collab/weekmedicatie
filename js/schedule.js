@@ -66,6 +66,10 @@ WM.Schedule = (() => {
         </div>
       </div>
 
+      <div class="sticky-progress ${pct === 100 ? 'complete' : ''}" id="sticky-progress">
+        <div class="sticky-progress-fill" id="sticky-progress-fill" style="width:${pct}%"></div>
+      </div>
+
       ${alerts.length > 0 ? alerts.slice(0, 3).map(a => WM.Stock.renderAlertBanner(a)).join('') : ''}`;
 
     MOMENTS.forEach(moment => {
@@ -197,11 +201,24 @@ WM.Schedule = (() => {
     const pctEl = document.getElementById('ring-pct');
     if (pctEl) pctEl.textContent = pct;
 
+    // Sticky strip bijwerken
+    const strip = document.getElementById('sticky-progress');
+    const stripFill = document.getElementById('sticky-progress-fill');
+    if (stripFill) stripFill.style.width = pct + '%';
+    if (strip) strip.classList.toggle('complete', pct === 100);
+
     const label = document.querySelector('.today-hero-label');
     if (label) {
       if (pct === 100) {
         label.textContent = '✅ Alles ingenomen!';
         label.classList.add('hero-complete');
+        // Celebratie-animatie op de hero-kaart
+        const hero = document.querySelector('.today-hero');
+        if (hero) {
+          hero.classList.remove('celebrate');
+          void hero.offsetWidth; // reflow zodat animatie herstart
+          hero.classList.add('celebrate');
+        }
         WM.Notifications.maybeCongratulate();
       } else {
         label.textContent = 'Voortgang vandaag';
