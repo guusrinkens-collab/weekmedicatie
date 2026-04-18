@@ -32,25 +32,41 @@ WM.Schedule = (() => {
 
     const pct = totalIntakes > 0 ? Math.round(doneIntakes / totalIntakes * 100) : 0;
 
+    const circumference = 2 * Math.PI * 54; // r=54
+    const dashOffset = circumference * (1 - pct / 100);
+    const ringColor = pct === 100 ? 'var(--success)' : 'url(#prog-gradient)';
+
     let html = `
-      <div style="width:100%;border-radius:16px;overflow:hidden;margin-bottom:16px;max-height:200px;">
-        <img src="assets/today-banner.jpg" alt="Weekmedicatie" style="width:100%;height:200px;object-fit:cover;object-position:center top;display:block;">
-      </div>
-      <p class="today-date">${formatDate(today, 'long')}</p>
-
-      ${alerts.length > 0 ? alerts.slice(0, 3).map(a => WM.Stock.renderAlertBanner(a)).join('') : ''}
-
-      <div class="today-progress">
-        <div class="progress-header">
-          <span class="progress-title ${pct === 100 ? 'progress-complete' : ''}">
+      <div class="today-hero">
+        <div class="today-hero-left">
+          <p class="today-hero-date">${formatDate(today, 'long')}</p>
+          <p class="today-hero-label ${pct === 100 ? 'hero-complete' : ''}">
             ${pct === 100 ? '✅ Alles ingenomen!' : 'Voortgang vandaag'}
-          </span>
-          <span class="progress-count">${doneIntakes} / ${totalIntakes}</span>
+          </p>
         </div>
-        <div class="progress-bar">
-          <div class="progress-fill" style="width:${pct}%" id="progress-fill"></div>
+        <div class="today-ring-wrap">
+          <svg class="today-ring" viewBox="0 0 120 120">
+            <defs>
+              <linearGradient id="prog-gradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" stop-color="var(--primary-light)"/>
+                <stop offset="100%" stop-color="var(--secondary)"/>
+              </linearGradient>
+            </defs>
+            <circle cx="60" cy="60" r="54" class="ring-track"/>
+            <circle cx="60" cy="60" r="54" class="ring-fill"
+              stroke="${ringColor}"
+              stroke-dasharray="${circumference}"
+              stroke-dashoffset="${dashOffset}"
+              id="progress-ring"/>
+          </svg>
+          <div class="ring-label">
+            <span class="ring-pct" id="ring-pct">${pct}</span>
+            <span class="ring-unit">%</span>
+          </div>
         </div>
-      </div>`;
+      </div>
+
+      ${alerts.length > 0 ? alerts.slice(0, 3).map(a => WM.Stock.renderAlertBanner(a)).join('') : ''}`;
 
     MOMENTS.forEach(moment => {
       const medsForMoment = meds.filter(med => med.moments && med.moments.includes(moment.key));
@@ -170,21 +186,26 @@ WM.Schedule = (() => {
     });
 
     const pct = total > 0 ? Math.round(done / total * 100) : 0;
-    const fill = document.getElementById('progress-fill');
-    if (fill) fill.style.width = pct + '%';
 
-    const countEl = document.querySelector('.progress-count');
-    if (countEl) countEl.textContent = `${done} / ${total}`;
+    // Ring bijwerken
+    const ring = document.getElementById('progress-ring');
+    const circumference = 2 * Math.PI * 54;
+    if (ring) {
+      ring.style.strokeDashoffset = circumference * (1 - pct / 100);
+      ring.setAttribute('stroke', pct === 100 ? 'var(--success)' : 'url(#prog-gradient)');
+    }
+    const pctEl = document.getElementById('ring-pct');
+    if (pctEl) pctEl.textContent = pct;
 
-    const title = document.querySelector('.progress-title');
-    if (title) {
+    const label = document.querySelector('.today-hero-label');
+    if (label) {
       if (pct === 100) {
-        title.textContent = '✅ Alles ingenomen!';
-        title.classList.add('progress-complete');
+        label.textContent = '✅ Alles ingenomen!';
+        label.classList.add('hero-complete');
         WM.Notifications.maybeCongratulate();
       } else {
-        title.textContent = 'Voortgang vandaag';
-        title.classList.remove('progress-complete');
+        label.textContent = 'Voortgang vandaag';
+        label.classList.remove('hero-complete');
       }
     }
 
