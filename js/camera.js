@@ -27,7 +27,7 @@ WM.Camera = (() => {
           ${WM.UI.icon('camera')} Foto maken / uploaden
         </label>
         <input type="file" id="camera-input" accept="image/*" capture="environment"
-               style="display:none;" onchange="WM.Camera.handleImage(event, '${medId}')">
+               style="display:none;" onchange="WM.Camera.handleImage(event, '${medId || ''}')">
 
         <p class="form-hint" style="margin-top:16px;">
           Zorg voor goede belichting en houd het label recht.
@@ -50,7 +50,9 @@ WM.Camera = (() => {
     const preview = document.getElementById('scan-preview');
     const img = document.getElementById('scan-img');
     if (preview && img) {
-      img.src = URL.createObjectURL(file);
+      const objectUrl = URL.createObjectURL(file);
+      img.src = objectUrl;
+      img.onload = () => URL.revokeObjectURL(objectUrl);
       preview.style.display = 'block';
     }
 
@@ -192,7 +194,7 @@ Regels:
         ${rowsHTML}
         <div style="margin-top:16px;">
           <button class="btn btn-primary btn-full"
-              onclick="WM.Camera.applyResult(${resultJSON}, '${medId}')">
+              onclick="WM.Camera.applyResult(${resultJSON}, '${medId || ''}')">
             💊 Nieuw medicijn aanmaken
           </button>
           ${stockBtn}
@@ -245,7 +247,7 @@ Regels:
   function applyResult(result, medId) {
     closeModal();
     setTimeout(() => {
-      if (medId) {
+      if (medId && medId !== 'null' && medId !== '') {
         WM.Medications.editMedication(medId);
       } else {
         WM.Medications.addMedication();

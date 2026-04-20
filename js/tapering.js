@@ -224,15 +224,18 @@ WM.Tapering = (() => {
 
   function deleteTapering(id) {
     WM.UI.confirmDialog('Afbouwschema verwijderen?', () => {
+      const t = TData.get(id);
+      if (t) {
+        const med = Medications.get(t.medicationId);
+        if (med && med.isTapering) {
+          Medications.save({ ...med, isTapering: false });
+        }
+      }
       TData.delete(id);
       toast('Afbouwschema verwijderd', 'success');
       closeModal();
       if (WM.App.currentPage() === 'afbouw') WM.App.refreshPage();
     });
-  }
-
-  function addTaperingForMed(medId) {
-    openTaperingModal(null, medId);
   }
 
   // Inline display voor een medicijn (op de vandaag-pagina)
@@ -249,5 +252,5 @@ WM.Tapering = (() => {
       </div>`;
   }
 
-  return { render, renderTaperingCard, openTaperingModal, editTapering, deleteTapering, addTaperingForMed, inlineStatus };
+  return { render, renderTaperingCard, openTaperingModal, editTapering, deleteTapering, inlineStatus };
 })();

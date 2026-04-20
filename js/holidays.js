@@ -25,7 +25,8 @@ WM.Holidays = (() => {
   }
 
   function toKey(date) {
-    return date.toISOString().slice(0, 10);
+    const d = date instanceof Date ? date : new Date(date);
+    return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
   }
 
   // Alle Nederlandse feestdagen voor een jaar

@@ -23,7 +23,12 @@ WM.Data = (() => {
   }
 
   function today() {
-    return new Date().toISOString().slice(0, 10);
+    const d = new Date();
+    return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+  }
+
+  function dateKey(d) {
+    return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
   }
 
   function load(key, fallback = null) {
@@ -76,6 +81,14 @@ WM.Data = (() => {
       save(KEYS.MEDICATIONS, meds);
       // Verwijder ook tapering
       WM.Data.Tapering.deleteForMedication(id);
+      // Verwijder wees-innames voor dit medicijn
+      const sched = load(KEYS.SCHEDULE, {});
+      Object.keys(sched).forEach(date => {
+        ['ochtend', 'middag', 'avond'].forEach(moment => {
+          if (sched[date][moment]) delete sched[date][moment][id];
+        });
+      });
+      save(KEYS.SCHEDULE, sched);
     },
 
     updateStock(id, delta) {
@@ -118,7 +131,7 @@ WM.Data = (() => {
       for (let i = 0; i < days; i++) {
         const d = new Date();
         d.setDate(d.getDate() - i);
-        const key = d.toISOString().slice(0, 10);
+        const key = dateKey(d);
         result.push({ date: key, data: all[key] || null });
       }
       return result;
@@ -129,7 +142,7 @@ WM.Data = (() => {
       const all = load(KEYS.SCHEDULE, {});
       const cutoff = new Date();
       cutoff.setDate(cutoff.getDate() - 60);
-      const cutoffStr = cutoff.toISOString().slice(0, 10);
+      const cutoffStr = dateKey(cutoff);
       Object.keys(all).forEach(k => { if (k < cutoffStr) delete all[k]; });
       save(KEYS.SCHEDULE, all);
     }
@@ -164,9 +177,9 @@ WM.Data = (() => {
       save(KEYS.TAPERING, this.all().filter(t => t.medicationId !== medId));
     },
 
-    // Bereken huidige dosis op basis van startdatum
+    // Bereken huidige dosis op basis van startdatum (ook voor inactieve schema's)
     currentDose(tapering) {
-      if (!tapering || !tapering.active) return null;
+      if (!tapering) return null;
       const start = new Date(tapering.startDate);
       const now = new Date();
       const daysPassed = Math.max(0, Math.floor((now - start) / 86400000));
@@ -189,7 +202,8 @@ WM.Data = (() => {
 
     isComplete(tapering) {
       if (!tapering) return false;
-      return this.currentDose(tapering) <= tapering.endDose;
+      const dose = this.currentDose(tapering);
+      return dose !== null && dose <= tapering.endDose;
     }
   };
 
@@ -211,7 +225,7 @@ WM.Data = (() => {
       for (let i = 0; i < days; i++) {
         const d = new Date();
         d.setDate(d.getDate() - i);
-        const key = d.toISOString().slice(0, 10);
+        const key = dateKey(d);
         result.push({ date: key, entry: all[key] || null });
       }
       return result;

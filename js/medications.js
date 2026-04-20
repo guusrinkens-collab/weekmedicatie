@@ -314,6 +314,12 @@ WM.Medications = (() => {
     const saved = MData.save(medData);
     const medId = existingId || (saved && saved.id);
 
+    // Valideer afbouwvelden als toggle aan staat
+    if (isTapering && (!data.taperStart || !data.taperEnd || !data.taperStep || !data.taperInterval)) {
+      toast('Vul alle afbouwvelden in of zet het schema uit', 'warning');
+      return;
+    }
+
     // Afbouwschema opslaan indien ingevuld
     if (isTapering && data.taperStart && data.taperEnd && data.taperStep && data.taperInterval) {
       const existing = TData.forMedication(medId);
@@ -335,6 +341,7 @@ WM.Medications = (() => {
     }
 
     closeModal();
+    WM.Notifications.scheduleToday();
     toast(existingId ? 'Medicijn bijgewerkt' : 'Medicijn toegevoegd', 'success');
     WM.App.refreshPage();
   }
@@ -344,6 +351,7 @@ WM.Medications = (() => {
     confirmDialog(`"${med ? med.name : 'Dit medicijn'}" definitief verwijderen?`, () => {
       MData.delete(id);
       closeModal();
+      WM.Notifications.scheduleToday();
       toast('Medicijn verwijderd', 'success');
       WM.App.refreshPage();
     });

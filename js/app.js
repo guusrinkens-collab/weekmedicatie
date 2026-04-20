@@ -10,6 +10,7 @@ WM.App = (() => {
     medicatie:   { render: () => WM.Medications.render(), title: 'Medicatie',       navKey: 'medicatie' },
     geschiedenis:{ render: () => WM.History.render(),     title: 'Geschiedenis',    navKey: 'geschiedenis' },
     meer:        { render: () => renderMeer(),             title: 'Meer',            navKey: 'meer' },
+    weekdoosjes: { render: () => WM.Weekdoosjes.render(),  title: 'Weekdoosjes',     navKey: 'meer' },
     thema:       { render: () => WM.Theme.render(),       title: 'Thema\'s',        navKey: 'meer' },
     contacten:   { render: () => WM.Contacts.render(),    title: 'Contacten',       navKey: 'meer' },
     afbouw:      { render: () => WM.Tapering.render(),    title: 'Afbouwschema\'s', navKey: 'meer' },
@@ -33,6 +34,11 @@ WM.App = (() => {
 
       <div class="section-title">Functies</div>
       <div class="meer-grid">
+        <div class="meer-card" onclick="WM.App.navigate('weekdoosjes')">
+          <div class="meer-card-icon" style="background:rgba(16,185,129,0.15);">🗓️</div>
+          <div class="meer-card-label">Weekdoosjes</div>
+          <div class="meer-card-sub">7-dagenplanning</div>
+        </div>
         <div class="meer-card" onclick="WM.App.navigate('afbouw')">
           <div class="meer-card-icon" style="background:rgba(139,92,246,0.15);">⬇️</div>
           <div class="meer-card-label">Afbouwschema's</div>
@@ -173,6 +179,19 @@ WM.App = (() => {
 
     // Scroll naar boven
     contentEl.scrollTop = 0;
+
+    // Nav-badge bijwerken
+    updateNavAlerts();
+  }
+
+  function updateNavAlerts() {
+    const alerts = WM.Stock.getAlerts();
+    const hasDanger = alerts.some(a => a.status === 'danger');
+    const hasAlert = alerts.length > 0;
+    const btn = document.querySelector('.nav-btn[data-page="medicatie"]');
+    if (!btn) return;
+    btn.classList.toggle('has-danger', hasDanger);
+    btn.classList.toggle('has-alert', !hasDanger && hasAlert);
   }
 
   function currentPage() { return _currentPage; }
@@ -237,21 +256,8 @@ WM.App = (() => {
       });
     });
 
-    // FAB koppelen per pagina
-    document.getElementById('fab-main')?.addEventListener('click', () => {
-      if (_currentPage === 'medicatie') WM.Medications.addMedication();
-      else if (_currentPage === 'vandaag') WM.App.navigate('medicatie');
-    });
-
     // Initiële pagina laden
     navigate('vandaag');
-
-    // Service Worker registreren
-    if ('serviceWorker' in navigator) {
-      navigator.serviceWorker.register('/service-worker.js').catch(err => {
-        console.warn('SW registratie mislukt:', err);
-      });
-    }
 
     // Online/offline melding
     window.addEventListener('online', () => WM.UI.toast('Verbinding hersteld', 'success'));
@@ -260,7 +266,7 @@ WM.App = (() => {
     console.log('💊 Weekmedicatie geladen');
   }
 
-  return { navigate, currentPage, refreshPage, saveApiKey, clearApiKey, saveThresholds, clearAllData, init, renderMeer };
+  return { navigate, currentPage, refreshPage, saveApiKey, clearApiKey, saveThresholds, clearAllData, updateNavAlerts, init, renderMeer };
 })();
 
 // ── App starten zodra DOM klaar is ────────────────────────

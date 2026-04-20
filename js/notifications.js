@@ -208,10 +208,30 @@ WM.Notifications = (() => {
     scheduleToday();
   }
 
+  // ── Kritieke bestelherinnering ────────────────────────────
+  function checkCriticalAlerts() {
+    const alerts = WM.Stock.getAlerts();
+    const today = WM.Data.today();
+    alerts.forEach(alert => {
+      if (alert.status !== 'danger') return;
+      const key = `wm_crit_notif_${alert.med.id}_${today}`;
+      if (localStorage.getItem(key)) return;
+      localStorage.setItem(key, '1');
+      if (hasPermission()) {
+        sendNotification(
+          `🚨 Bestelherinnering: ${alert.med.name}`,
+          `Nog ${alert.days} dag${alert.days !== 1 ? 'en' : ''} voorraad. ${alert.orderMessage}`,
+          `critical-stock-${alert.med.id}`
+        );
+      }
+    });
+  }
+
   function init() {
     scheduleToday();
     scheduleMidnightReset();
+    checkCriticalAlerts();
   }
 
-  return { requestPermission, hasPermission, sendNotification, scheduleToday, maybeCongratulate, renderSettingsSection, toggleNotifications, enable, saveTime, init };
+  return { requestPermission, hasPermission, sendNotification, scheduleToday, maybeCongratulate, checkCriticalAlerts, renderSettingsSection, toggleNotifications, enable, saveTime, init };
 })();

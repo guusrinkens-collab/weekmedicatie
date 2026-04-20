@@ -1,4 +1,4 @@
-const CACHE_NAME = 'weekmedicatie-v3';
+const CACHE_NAME = 'weekmedicatie-v6';
 const BASE = self.registration.scope;
 const ASSETS = [
   BASE,
@@ -17,6 +17,7 @@ const ASSETS = [
   BASE + 'js/theme.js',
   BASE + 'js/camera.js',
   BASE + 'js/notifications.js',
+  BASE + 'js/weekdoosjes.js',
   BASE + 'js/history.js',
   BASE + 'js/wellbeing.js',
   BASE + 'js/contacts.js',

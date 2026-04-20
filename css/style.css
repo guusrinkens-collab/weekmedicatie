@@ -145,6 +145,21 @@ a { color: var(--primary-light); text-decoration: none; }
   position: relative;
 }
 .nav-btn.active { color: var(--primary-light); }
+.nav-btn.has-alert::after,
+.nav-btn.has-danger::after {
+  content: '';
+  position: absolute;
+  top: 5px;
+  right: calc(50% - 15px);
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  border: 2px solid var(--bg-surface);
+  pointer-events: none;
+}
+.nav-btn.has-alert::after  { background: var(--warning, #f59e0b); }
+.nav-btn.has-danger::after { background: var(--danger, #ef4444); animation: pulse-dot 1.4s ease-in-out infinite; }
+@keyframes pulse-dot { 0%,100% { transform: scale(1); } 50% { transform: scale(1.5); } }
 .nav-btn.active::before {
   content: '';
   position: absolute;
@@ -988,6 +1003,106 @@ a { color: var(--primary-light); text-decoration: none; }
   --secondary: #f97316; --accent: #a855f7;
   --bg: #1a0812; --bg-surface: #250d1a; --bg-card: #33111f; --bg-card2: #170610;
 }
+
+/* ── Weekdoosjes ─────────────────────────────────────────── */
+.weekdoos-intro {
+  font-size: 0.82rem;
+  color: var(--text-muted);
+  margin-bottom: 12px;
+}
+.weekdoos-scroll {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  margin: 0 -4px;
+  padding-bottom: 4px;
+}
+.weekdoos-table {
+  border-collapse: collapse;
+  min-width: 100%;
+  font-size: 0.78rem;
+}
+.weekdoos-table th,
+.weekdoos-table td {
+  padding: 6px 4px;
+  vertical-align: top;
+}
+.weekdoos-moment-col { width: 72px; min-width: 72px; }
+.weekdoos-day-col {
+  text-align: center;
+  min-width: 54px;
+  border-bottom: 2px solid var(--border);
+}
+.weekdoos-day-col.today {
+  border-bottom: 2px solid var(--primary-light);
+}
+.weekdoos-day-col.today .weekdoos-day-name,
+.weekdoos-day-col.today .weekdoos-day-date {
+  color: var(--primary-light);
+}
+.weekdoos-day-name { font-weight: 700; font-size: 0.78rem; }
+.weekdoos-day-date { font-size: 0.65rem; color: var(--text-muted); }
+.weekdoos-moment-label {
+  font-weight: 600;
+  white-space: nowrap;
+  color: var(--text-muted);
+  font-size: 0.73rem;
+  padding-top: 10px;
+}
+.weekdoos-moment-emoji { margin-right: 3px; }
+.weekdoos-cell {
+  border-left: 1px solid var(--border);
+  border-top: 1px solid var(--border);
+  text-align: center;
+  padding: 6px 4px;
+  min-width: 54px;
+}
+.weekdoos-cell.today { background: rgba(108, 99, 255, 0.07); }
+.weekdoos-pill {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-bottom: 5px;
+}
+.weekdoos-pill-name {
+  font-size: 0.68rem;
+  color: var(--text);
+  font-weight: 500;
+  line-height: 1.2;
+  word-break: break-word;
+}
+.weekdoos-pill-count {
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: var(--primary-light);
+}
+.weekdoos-tip {
+  margin-top: 12px;
+  padding: 10px 12px;
+  background: rgba(108, 99, 255, 0.1);
+  border-radius: 8px;
+  font-size: 0.78rem;
+  color: var(--text-muted);
+}
+.weekdoos-totals {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 4px;
+  margin-top: 4px;
+}
+.weekdoos-total-card {
+  background: var(--bg-card);
+  border-radius: 8px;
+  padding: 8px 4px;
+  text-align: center;
+  border: 1px solid var(--border);
+}
+.weekdoos-total-card.today {
+  border-color: var(--primary-light);
+}
+.weekdoos-total-day { font-weight: 700; font-size: 0.75rem; }
+.weekdoos-total-date { font-size: 0.6rem; color: var(--text-muted); margin-bottom: 4px; }
+.weekdoos-total-count { font-size: 0.72rem; font-weight: 600; color: var(--primary-light); }
+.weekdoos-total-taper { font-size: 0.62rem; color: var(--text-muted); margin-top: 2px; }
 
 /* ── Animaties ───────────────────────────────────────────── */
 @keyframes pulse { 0%,100% { opacity: 1; } 50% { opacity: 0.6; } }

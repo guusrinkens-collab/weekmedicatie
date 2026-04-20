@@ -70,7 +70,8 @@ WM.Schedule = (() => {
         <div class="sticky-progress-fill" id="sticky-progress-fill" style="width:${pct}%"></div>
       </div>
 
-      ${alerts.length > 0 ? alerts.slice(0, 3).map(a => WM.Stock.renderAlertBanner(a)).join('') : ''}`;
+      ${alerts.length > 0 ? alerts.slice(0, 3).map(a => WM.Stock.renderAlertBanner(a)).join('') : ''}
+      ${WM.Wellbeing.todayWidget()}`;
 
     MOMENTS.forEach(moment => {
       const medsForMoment = meds.filter(med => med.moments && med.moments.includes(moment.key));
@@ -173,6 +174,10 @@ WM.Schedule = (() => {
       const med = Medications.get(medId);
       toast(`${med ? med.name : 'Medicijn'} ingenomen ✓`, 'success', 2000);
     }
+
+    // Kritieke voorraad controleren & nav-badge bijwerken
+    WM.Notifications.checkCriticalAlerts();
+    WM.App.updateNavAlerts();
   }
 
   function updateProgress() {
@@ -245,7 +250,7 @@ WM.Schedule = (() => {
     if (lastDate && lastDate !== today) {
       // Nieuwe dag: opschonen
       WM.Data.Schedule.cleanup();
-      toast('Goedemorgen! Schema is gereset voor vandaag.', 'info', 4000);
+      toast('Goedemorgen! Nieuwe dag gestart.', 'info', 4000);
     }
     localStorage.setItem('wm_last_date', today);
   }
