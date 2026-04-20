@@ -92,21 +92,31 @@ WM.Camera = (() => {
 
     if (!apiKey) throw new Error('Geen API-sleutel ingesteld');
 
-    const prompt = `Analyseer dit apothekerlabel van een Nederlandse apotheek en extraheer de volgende informatie.
-Geef het antwoord ALLEEN als JSON (geen uitleg, geen markdown, geen code block):
+    const prompt = `Je analyseert een foto van een Nederlands apothekerlabel.
+
+BELANGRIJK — welke tekst lezen:
+- Lees ALLEEN de tekst op het apothekerlabel op de voorgrond (het witte of gekleurde stickerlabel van de apotheek).
+- Negeer tekst die zichtbaar is door het label heen van de verpakking eronder (fabrikantsnaam, barcode, achtergrondtekst).
+- Bij overlappende of gedeeltelijk zichtbare tekst: gebruik de meest leesbare versie en noteer twijfel in het "warning"-veld.
+- Bij laag contrast of onduidelijk beeld: doe je best en geef confidence "low" mee.
+
+Geef het antwoord UITSLUITEND als geldige JSON (geen uitleg, geen markdown, geen code block):
 {
-  "name": "alleen de merknaam of generieke naam van het medicijn (bv. 'Metoprolol' of 'Losartan'), NIET de dosering of fabrikant",
-  "dosage": "alleen de sterkte per tablet/capsule (bv. '50mg' of '10mg/ml'), NIET de inname-instructies",
-  "quantity": 30,
-  "usageInstructions": "hoe en wanneer innemen (bv. '1 tablet per dag, ochtend bij het opstaan')",
-  "activeIngredient": "werkzame stof indien apart vermeld"
+  "medication_name": "alleen de merknaam of generieke naam van het medicijn (bv. 'Metoprolol'), maximaal 3 woorden, NIET de dosering",
+  "dosage": "alleen de sterkte per eenheid (bv. '50 mg' of '10 mg/ml'), NIET de inname-instructies",
+  "package_quantity": "het totale aantal tabletten/capsules/ml in de verpakking als getal (bv. 30), of null",
+  "usage_instructions": "hoe en wanneer innemen (bv. '1 tablet per dag, ochtend bij het opstaan'), of null",
+  "confidence": "high | medium | low",
+  "warning": "optionele string — vul in bij slechte beeldkwaliteit, onduidelijke tekst of twijfel over een veld; laat weg als alles duidelijk is"
 }
 
 Regels:
-- name: alleen de medicijnnaam, maximaal 3 woorden
-- dosage: alleen getal + eenheid (mg, ml, mcg, IE), geen instructies
-- quantity: alleen het getal (integer), of null
-- Als een veld niet leesbaar is, gebruik null`;
+- Geef ALTIJD een resultaat terug, ook bij slechte kwaliteit — gebruik dan confidence "low" en een beschrijvend warning-bericht.
+- confidence "high": alle velden duidelijk leesbaar.
+- confidence "medium": meeste velden leesbaar, één veld onzeker.
+- confidence "low": beeld onduidelijk, meerdere velden onzeker, of tekst van onderliggende verpakking stoort.
+- package_quantity: alleen het getal (integer) of null, geen eenheden.
+- Geef nooit een lege JSON of een foutmelding terug.`;
 
     const controller = new AbortController();
     const timeout = setTimeout(() => controller.abort(), 30000);
@@ -166,10 +176,10 @@ Regels:
     if (!container) return;
 
     const rows = [
-      result.name           && { label: 'Naam',         value: result.name },
-      result.dosage         && { label: 'Dosering',     value: result.dosage },
-      result.quantity       && { label: 'Aantal stuks', value: result.quantity },
-      result.usageInstructions && { label: 'Gebruik',   value: result.usageInstructions },
+      result.medication_name    && { label: 'Naam',         value: result.medication_name },
+      result.dosage             && { label: 'Dosering',     value: result.dosage },
+      result.package_quantity   && { label: 'Aantal stuks', value: result.package_quantity },
+      result.usage_instructions && { label: 'Gebruik',      value: result.usage_instructions },
     ].filter(Boolean);
 
     const rowsHTML = rows.map(r => `
@@ -178,10 +188,23 @@ Regels:
         <span class="scan-row-value">${r.value}</span>
       </div>`).join('');
 
+    const needsVerification = result.confidence === 'low' || result.warning;
+    const warningText = result.warning || 'De scan is onzeker. Controleer de ingevulde gegevens voordat u opslaat.';
+    const warningBanner = needsVerification ? `
+      <div class="scan-warning-banner">
+        <span class="scan-warning-icon">⚠️</span>
+        <span>${warningText}</span>
+      </div>` : '';
+
+    const confidenceBadge = result.confidence ? `
+      <span class="scan-confidence scan-confidence--${result.confidence}">
+        ${result.confidence === 'high' ? '✓ Hoge zekerheid' : result.confidence === 'medium' ? '~ Gemiddelde zekerheid' : '! Lage zekerheid'}
+      </span>` : '';
+
     const existingMeds = WM.Data.Medications.all();
     const resultJSON = JSON.stringify(result).replace(/"/g, '&quot;');
 
-    const stockBtn = existingMeds.length > 0 && result.quantity
+    const stockBtn = existingMeds.length > 0 && result.package_quantity
       ? `<button class="btn btn-outline btn-full" style="margin-top:10px;"
              onclick="WM.Camera.openStockRefill(${resultJSON})">
            📦 Bijvullen voor bestaand medicijn
@@ -190,7 +213,11 @@ Regels:
 
     container.innerHTML = `
       <div class="scan-result-card">
-        <div class="scan-result-header">✓ Label gelezen</div>
+        <div class="scan-result-header" style="display:flex;align-items:center;justify-content:space-between;">
+          <span>✓ Label gelezen</span>
+          ${confidenceBadge}
+        </div>
+        ${warningBanner}
         ${rowsHTML}
         <div style="margin-top:16px;">
           <button class="btn btn-primary btn-full"
@@ -245,6 +272,12 @@ Regels:
 
   // ── Scan toepassen op medicijnformulier ───────────────────
   function applyResult(result, medId) {
+    const mapped = {
+      name:              result.medication_name,
+      dosage:            result.dosage,
+      quantity:          result.package_quantity,
+      usageInstructions: result.usage_instructions,
+    };
     closeModal();
     setTimeout(() => {
       if (medId && medId !== 'null' && medId !== '') {
@@ -252,7 +285,13 @@ Regels:
       } else {
         WM.Medications.addMedication();
       }
-      setTimeout(() => WM.Medications.prefillForm(result), 300);
+      setTimeout(() => {
+        WM.Medications.prefillForm(mapped);
+        if (result.confidence === 'low' || result.warning) {
+          const msg = result.warning || 'Lage scanzekerheid — controleer de gegevens voor het opslaan.';
+          WM.UI.toast('⚠️ ' + msg, 'warning', 7000);
+        }
+      }, 300);
     }, 300);
   }
 
