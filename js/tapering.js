@@ -130,17 +130,17 @@ WM.Tapering = (() => {
         <div class="form-row">
           <div class="form-group">
             <label class="form-label">Startdosis</label>
-            <input type="number" name="startDose" class="form-input" value="${t.startDose || ''}" min="0" step="0.5" required placeholder="bv. 20">
+            <input type="number" name="startDose" class="form-input" value="${t.startDose || ''}" min="0" step="0.01" required placeholder="bv. 1.5">
           </div>
           <div class="form-group">
             <label class="form-label">Einddosis</label>
-            <input type="number" name="endDose" class="form-input" value="${t.endDose || ''}" min="0" step="0.5" required placeholder="bv. 0">
+            <input type="number" name="endDose" class="form-input" value="${t.endDose || ''}" min="0" step="0.01" required placeholder="bv. 0">
           </div>
         </div>
         <div class="form-row">
           <div class="form-group">
             <label class="form-label">Vermindering per stap</label>
-            <input type="number" name="reductionStep" class="form-input" value="${t.reductionStep || ''}" min="0.5" step="0.5" required placeholder="bv. 5">
+            <input type="number" name="reductionStep" class="form-input" value="${t.reductionStep || ''}" min="0.01" step="0.01" required placeholder="bv. 0.25">
           </div>
           <div class="form-group">
             <label class="form-label">Interval (dagen)</label>

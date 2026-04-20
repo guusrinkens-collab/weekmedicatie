@@ -108,7 +108,7 @@ WM.Medications = (() => {
         <div class="form-row">
           <div class="form-group">
             <label class="form-label">Pillen per inname</label>
-            <input type="number" name="pillsPerDose" class="form-input" value="${m.pillsPerDose || 1}" min="0.5" step="0.5">
+            <input type="number" name="pillsPerDose" class="form-input" value="${m.pillsPerDose || 1}" min="0.01" step="0.01">
           </div>
           <div class="form-group">
             <label class="form-label">Huidige voorraad</label>
@@ -118,7 +118,7 @@ WM.Medications = (() => {
 
         <div class="form-group">
           <label class="form-label">Gebruik per dag (berekend)</label>
-          <input type="number" name="dailyUsage" class="form-input" id="daily-usage-input" value="${m.dailyUsage || ''}" min="0" step="0.5" placeholder="automatisch berekend">
+          <input type="number" name="dailyUsage" class="form-input" id="daily-usage-input" value="${m.dailyUsage || ''}" min="0" step="0.01" placeholder="automatisch berekend">
           <p class="form-hint">Wordt automatisch berekend: pillen per inname × aantal momenten</p>
         </div>
 
@@ -148,7 +148,7 @@ WM.Medications = (() => {
           <div class="form-row">
             <div class="form-group">
               <label class="form-label">Vermindering/stap</label>
-              <input type="number" name="taperStep" class="form-input" value="${tapering ? tapering.reductionStep : ''}" min="0.1" step="0.1" placeholder="bv. 0.25">
+              <input type="number" name="taperStep" class="form-input" value="${tapering ? tapering.reductionStep : ''}" min="0.01" step="0.01" placeholder="bv. 0.25">
             </div>
             <div class="form-group">
               <label class="form-label">Interval (dagen)</label>
