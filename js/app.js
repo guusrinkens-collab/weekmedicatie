@@ -149,9 +149,12 @@ WM.App = (() => {
   }
 
   // ── Navigatie ─────────────────────────────────────────────
-  const SUBPAGES = ['weekdoosjes', 'thema', 'contacten', 'afbouw', 'welzijn', 'instellingen'];
+  const SUBPAGE_PARENT = {
+    weekdoosjes: 'meer', thema: 'meer', contacten: 'meer',
+    afbouw: 'meer', welzijn: 'meer', instellingen: 'meer'
+  };
 
-  function navigate(pageKey, pushState = true) {
+  function navigate(pageKey) {
     if (!PAGES[pageKey]) return;
     _currentPage = pageKey;
 
@@ -180,6 +183,18 @@ WM.App = (() => {
     const titleEl = document.getElementById('app-title');
     if (titleEl) titleEl.textContent = page.title;
 
+    // Terugknop in header tonen/verbergen
+    const backBtn = document.getElementById('header-back-btn');
+    if (backBtn) {
+      const parent = SUBPAGE_PARENT[pageKey];
+      if (parent) {
+        backBtn.style.display = 'flex';
+        backBtn.onclick = () => navigate(parent);
+      } else {
+        backBtn.style.display = 'none';
+      }
+    }
+
     // Page-specific initialisaties
     if (pageKey === 'thema') {
       setTimeout(() => WM.Theme.initColorPickers(), 100);
@@ -190,15 +205,6 @@ WM.App = (() => {
 
     // Nav-badge bijwerken
     updateNavAlerts();
-
-    // Browser-history voor Android teruggesture
-    if (pushState) {
-      if (SUBPAGES.includes(pageKey)) {
-        history.pushState({ page: pageKey }, '', '');
-      } else {
-        history.replaceState({ page: pageKey }, '', '');
-      }
-    }
   }
 
   function updateNavAlerts() {
@@ -324,17 +330,6 @@ WM.App = (() => {
     // Online/offline melding
     window.addEventListener('online', () => WM.UI.toast('Verbinding hersteld', 'success'));
     window.addEventListener('offline', () => WM.UI.toast('Geen internetverbinding – app werkt offline', 'warning'));
-
-    // Android teruggesture
-    history.replaceState({ page: 'vandaag' }, '', '');
-    window.addEventListener('popstate', e => {
-      const pageKey = e.state?.page;
-      if (pageKey && PAGES[pageKey]) {
-        navigate(pageKey, false);
-      } else {
-        navigate('vandaag', false);
-      }
-    });
 
     // Pull-to-refresh
     initPullToRefresh();
