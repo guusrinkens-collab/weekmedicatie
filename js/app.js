@@ -231,6 +231,51 @@ WM.App = (() => {
     );
   }
 
+  // ── Pull-to-refresh ───────────────────────────────────
+  function initPullToRefresh() {
+    const el = document.getElementById('page-content');
+    const indicator = document.getElementById('ptr-indicator');
+    if (!el || !indicator) return;
+
+    const THRESHOLD = 65;
+    let startY = 0;
+    let pulling = false;
+
+    el.addEventListener('touchstart', e => {
+      if (el.scrollTop === 0) {
+        startY = e.touches[0].clientY;
+        pulling = true;
+      }
+    }, { passive: true });
+
+    el.addEventListener('touchmove', e => {
+      if (!pulling) return;
+      const dist = e.touches[0].clientY - startY;
+      if (dist <= 0) { pulling = false; return; }
+      indicator.classList.toggle('ptr-ready', dist >= THRESHOLD);
+      indicator.classList.add('ptr-pulling');
+    }, { passive: true });
+
+    el.addEventListener('touchend', () => {
+      if (!pulling) return;
+      pulling = false;
+      if (!indicator.classList.contains('ptr-ready')) {
+        indicator.className = '';
+        return;
+      }
+      indicator.classList.remove('ptr-pulling', 'ptr-ready');
+      indicator.classList.add('ptr-loading');
+      if ('serviceWorker' in navigator) {
+        navigator.serviceWorker.getRegistration().then(reg => {
+          if (reg) reg.update();
+          setTimeout(() => location.reload(), 800);
+        });
+      } else {
+        setTimeout(() => location.reload(), 800);
+      }
+    });
+  }
+
   // ── Initialisatie ─────────────────────────────────────────
   function init() {
     // Thema laden
@@ -262,6 +307,9 @@ WM.App = (() => {
     // Online/offline melding
     window.addEventListener('online', () => WM.UI.toast('Verbinding hersteld', 'success'));
     window.addEventListener('offline', () => WM.UI.toast('Geen internetverbinding – app werkt offline', 'warning'));
+
+    // Pull-to-refresh
+    initPullToRefresh();
 
     console.log('💊 Weekmedicatie geladen');
   }

@@ -111,6 +111,46 @@ a { color: var(--primary-light); text-decoration: none; }
 .page.slide-in { display: block; animation: slideIn 0.25s ease forwards; }
 .page.slide-out { display: block; animation: slideOut 0.2s ease forwards; }
 
+/* ── Pull-to-refresh ─────────────────────────────────────── */
+#ptr-indicator {
+  position: fixed;
+  top: var(--header-h);
+  left: 50%;
+  transform: translateX(-50%) translateY(-56px);
+  z-index: 200;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: var(--bg-card);
+  border: 1.5px solid var(--border);
+  box-shadow: var(--shadow-sm);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform 0.2s ease, opacity 0.2s ease;
+  opacity: 0;
+  pointer-events: none;
+}
+#ptr-indicator.ptr-pulling {
+  opacity: 1;
+  transform: translateX(-50%) translateY(8px);
+}
+#ptr-indicator.ptr-loading {
+  opacity: 1;
+  transform: translateX(-50%) translateY(8px);
+}
+#ptr-indicator svg {
+  width: 20px;
+  height: 20px;
+  stroke: var(--primary-light);
+  transition: transform 0.2s ease;
+}
+#ptr-indicator.ptr-ready svg { transform: rotate(180deg); }
+@keyframes ptr-spin {
+  to { transform: rotate(360deg); }
+}
+#ptr-indicator.ptr-loading svg { animation: ptr-spin 0.7s linear infinite; }
+
 @keyframes slideIn {
   from { opacity: 0; transform: translateX(30px); }
   to   { opacity: 1; transform: translateX(0); }
