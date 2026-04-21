@@ -94,6 +94,7 @@ a { color: var(--primary-light); text-decoration: none; }
   position: absolute;
   inset: 0;
   overflow-y: auto;
+  overscroll-behavior-y: contain;
   -webkit-overflow-scrolling: touch;
   padding: 16px 16px calc(var(--nav-h) + 16px);
   opacity: 0;

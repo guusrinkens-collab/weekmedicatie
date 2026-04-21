@@ -241,22 +241,22 @@ WM.App = (() => {
     let startY = 0;
     let pulling = false;
 
-    el.addEventListener('touchstart', e => {
+    document.addEventListener('touchstart', e => {
       if (el.scrollTop === 0) {
         startY = e.touches[0].clientY;
         pulling = true;
       }
     }, { passive: true });
 
-    el.addEventListener('touchmove', e => {
+    document.addEventListener('touchmove', e => {
       if (!pulling) return;
       const dist = e.touches[0].clientY - startY;
-      if (dist <= 0) { pulling = false; return; }
+      if (dist <= 0) { pulling = false; indicator.className = ''; return; }
       indicator.classList.toggle('ptr-ready', dist >= THRESHOLD);
       indicator.classList.add('ptr-pulling');
     }, { passive: true });
 
-    el.addEventListener('touchend', () => {
+    document.addEventListener('touchend', () => {
       if (!pulling) return;
       pulling = false;
       if (!indicator.classList.contains('ptr-ready')) {

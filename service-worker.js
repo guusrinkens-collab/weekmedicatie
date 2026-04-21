@@ -1,4 +1,4 @@
-const CACHE_NAME = 'weekmedicatie-v8';
+const CACHE_NAME = 'weekmedicatie-v9';
 const BASE = self.registration.scope;
 const ASSETS = [
   BASE,
