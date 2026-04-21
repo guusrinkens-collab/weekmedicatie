@@ -149,7 +149,9 @@ WM.App = (() => {
   }
 
   // ── Navigatie ─────────────────────────────────────────────
-  function navigate(pageKey) {
+  const SUBPAGES = ['weekdoosjes', 'thema', 'contacten', 'afbouw', 'welzijn', 'instellingen'];
+
+  function navigate(pageKey, pushState = true) {
     if (!PAGES[pageKey]) return;
     _currentPage = pageKey;
 
@@ -158,7 +160,13 @@ WM.App = (() => {
     if (!contentEl) return;
 
     // Render pagina
-    contentEl.innerHTML = page.render();
+    try {
+      contentEl.innerHTML = page.render();
+    } catch (err) {
+      console.error('Paginafout:', err);
+      WM.UI.toast('Fout bij laden: ' + err.message, 'error');
+      return;
+    }
     contentEl.classList.add('slide-in');
     setTimeout(() => contentEl.classList.remove('slide-in'), 300);
 
@@ -182,6 +190,15 @@ WM.App = (() => {
 
     // Nav-badge bijwerken
     updateNavAlerts();
+
+    // Browser-history voor Android teruggesture
+    if (pushState) {
+      if (SUBPAGES.includes(pageKey)) {
+        history.pushState({ page: pageKey }, '', '');
+      } else {
+        history.replaceState({ page: pageKey }, '', '');
+      }
+    }
   }
 
   function updateNavAlerts() {
@@ -307,6 +324,17 @@ WM.App = (() => {
     // Online/offline melding
     window.addEventListener('online', () => WM.UI.toast('Verbinding hersteld', 'success'));
     window.addEventListener('offline', () => WM.UI.toast('Geen internetverbinding – app werkt offline', 'warning'));
+
+    // Android teruggesture
+    history.replaceState({ page: 'vandaag' }, '', '');
+    window.addEventListener('popstate', e => {
+      const pageKey = e.state?.page;
+      if (pageKey && PAGES[pageKey]) {
+        navigate(pageKey, false);
+      } else {
+        navigate('vandaag', false);
+      }
+    });
 
     // Pull-to-refresh
     initPullToRefresh();

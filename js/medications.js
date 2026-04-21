@@ -55,6 +55,9 @@ WM.Medications = (() => {
           ${taperBadge}
         </div>
         <div class="med-right">
+          <button class="btn-edit-med" onclick="event.stopPropagation();WM.Medications.editMedication('${med.id}')" title="Bewerken">
+            ${WM.UI.icon('edit')}
+          </button>
           ${WM.Stock.renderStockInfo(med)}
           <button class="btn btn-sm btn-outline refill-btn"
               onclick="event.stopPropagation();WM.Medications.quickFillStock('${med.id}')"

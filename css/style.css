@@ -532,6 +532,17 @@ a { color: var(--primary-light); text-decoration: none; }
 .stock-warn { color: var(--warning); }
 .stock-danger { color: var(--danger); }
 .refill-btn { font-size: 0.72rem; padding: 5px 10px; white-space: nowrap; }
+.btn-edit-med {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: var(--text-muted);
+  padding: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.btn-edit-med .icon svg { width: 16px; height: 16px; stroke: var(--text-muted); }
 
 /* Voorraadwaarschuwing */
 .alert-banner {
