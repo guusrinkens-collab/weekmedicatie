@@ -38,7 +38,7 @@
     <h1 id="app-title">Vandaag</h1>
     <div class="header-right">
       <button class="icon-btn" title="Medicijn toevoegen"
-              onclick="if(WM.App.currentPage()==='medicatie')WM.Medications.addMedication();else WM.App.navigate('medicatie')">
+              onclick="WM.Medications.startAddFlow()">
         <span class="icon">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
             <line x1="12" y1="5" x2="12" y2="19"/>
@@ -168,7 +168,7 @@
         + '<h1 style="font-size:1.8rem;font-weight:800;background:linear-gradient(135deg,var(--primary-light),var(--secondary));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;margin-bottom:8px;">Weekmedicatie</h1>'
         + '<p style="color:var(--text-muted);margin-bottom:32px;max-width:300px;line-height:1.6;">Uw persoonlijke medicatie-assistent. Bijhouden, beheren en nooit meer vergeten.</p>'
         + '<div style="display:flex;flex-direction:column;gap:12px;width:100%;max-width:300px;">'
-        + '<button class="btn btn-primary btn-lg" onclick="WM.App.navigate(\'medicatie\');setTimeout(()=>WM.Medications.addMedication(),100);closeWelcome()">&#128138; Eerste medicijn toevoegen</button>'
+        + '<button class="btn btn-primary btn-lg" onclick="closeWelcome();setTimeout(()=>WM.App.navigate(\'medicatie-start\'),150)">&#128138; Eerste medicijn toevoegen</button>'
         + '<button class="btn btn-outline" onclick="closeWelcome()">Later instellen</button>'
         + '</div>'
         + '<p style="margin-top:24px;font-size:0.72rem;color:var(--text-dim);">Alle gegevens worden alleen op uw apparaat opgeslagen.</p>';
