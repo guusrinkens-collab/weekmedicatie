@@ -6,16 +6,20 @@ window.WM = window.WM || {};
 WM.App = (() => {
   // ── Paginadefinities ──────────────────────────────────────
   const PAGES = {
-    vandaag:     { render: () => WM.Schedule.render(),    title: 'Vandaag',         navKey: 'vandaag' },
-    medicatie:   { render: () => WM.Medications.render(), title: 'Medicatie',       navKey: 'medicatie' },
-    geschiedenis:{ render: () => WM.History.render(),     title: 'Geschiedenis',    navKey: 'geschiedenis' },
-    meer:        { render: () => renderMeer(),             title: 'Meer',            navKey: 'meer' },
-    weekdoosjes: { render: () => WM.Weekdoosjes.render(),  title: 'Weekdoosjes',     navKey: 'meer' },
-    thema:       { render: () => WM.Theme.render(),       title: 'Thema\'s',        navKey: 'meer' },
-    contacten:   { render: () => WM.Contacts.render(),    title: 'Contacten',       navKey: 'meer' },
-    afbouw:      { render: () => WM.Tapering.render(),    title: 'Afbouwschema\'s', navKey: 'meer' },
-    welzijn:     { render: () => WM.Wellbeing.render(),   title: 'Welzijnslog',     navKey: 'meer' },
-    instellingen:{ render: () => renderSettings(),        title: 'Instellingen',    navKey: 'meer' }
+    vandaag:          { render: () => WM.Schedule.render(),           title: 'Vandaag',            navKey: 'vandaag' },
+    medicatie:        { render: () => WM.Medications.render(),        title: 'Medicatie',          navKey: 'medicatie' },
+    'medicatie-start':{ render: () => WM.Medications.renderStart(),   title: 'Medicijn toevoegen', navKey: 'medicatie' },
+    'medicatie-stap1':{ render: () => WM.Medications.renderStap1(),   title: 'Stap 1 van 2',       navKey: 'medicatie' },
+    'medicatie-stap2':{ render: () => WM.Medications.renderStap2(),   title: 'Stap 2 van 2',       navKey: 'medicatie' },
+    'medicatie-detail':{ render: () => WM.Medications.renderDetail(), title: 'Medicijndetail',     navKey: 'medicatie' },
+    geschiedenis:     { render: () => WM.History.render(),            title: 'Geschiedenis',       navKey: 'geschiedenis' },
+    meer:             { render: () => renderMeer(),                    title: 'Meer',               navKey: 'meer' },
+    weekdoosjes:      { render: () => WM.Weekdoosjes.render(),        title: 'Weekdoosjes',        navKey: 'meer' },
+    thema:            { render: () => WM.Theme.render(),              title: 'Thema\'s',           navKey: 'meer' },
+    contacten:        { render: () => WM.Contacts.render(),           title: 'Contacten',          navKey: 'meer' },
+    afbouw:           { render: () => WM.Tapering.render(),           title: 'Afbouwschema\'s',    navKey: 'meer' },
+    welzijn:          { render: () => WM.Wellbeing.render(),          title: 'Welzijnslog',        navKey: 'meer' },
+    instellingen:     { render: () => renderSettings(),               title: 'Instellingen',       navKey: 'meer' }
   };
 
   const NAV_TABS = ['vandaag', 'medicatie', 'geschiedenis', 'meer'];
@@ -151,7 +155,11 @@ WM.App = (() => {
   // ── Navigatie ─────────────────────────────────────────────
   const SUBPAGE_PARENT = {
     weekdoosjes: 'meer', thema: 'meer', contacten: 'meer',
-    afbouw: 'meer', welzijn: 'meer', instellingen: 'meer'
+    afbouw: 'meer', welzijn: 'meer', instellingen: 'meer',
+    'medicatie-start':  'medicatie',
+    'medicatie-stap1':  'medicatie-start',
+    'medicatie-stap2':  'medicatie-stap1',
+    'medicatie-detail': 'medicatie'
   };
 
   function navigate(pageKey) {
