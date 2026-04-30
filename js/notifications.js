@@ -33,8 +33,8 @@ WM.Notifications = (() => {
     if (!hasPermission()) return;
     new Notification(title, {
       body,
-      icon: '/icons/icon.svg',
-      badge: '/icons/icon.svg',
+      icon: new URL('icons/icon.svg', location.href).href,
+      badge: new URL('icons/icon.svg', location.href).href,
       tag,
       renotify: true,
       vibrate: [200, 100, 200]
@@ -219,7 +219,7 @@ WM.Notifications = (() => {
       localStorage.setItem(key, '1');
       if (hasPermission()) {
         sendNotification(
-          `🚨 Bestelherinnering: ${alert.med.name}`,
+          `🚨 Bel huisarts/specialist: ${alert.med.name}`,
           `Nog ${alert.days} dag${alert.days !== 1 ? 'en' : ''} voorraad. ${alert.orderMessage}`,
           `critical-stock-${alert.med.id}`
         );

@@ -4,8 +4,9 @@
 window.WM = window.WM || {};
 
 WM.Stock = (() => {
-  const { Medications, Settings } = WM.Data;
+  const { Medications, Settings, Contacts } = WM.Data;
   const { isPharmacyClosed, latestSafeOrderDate, addDays, toKey } = WM.Holidays;
+  const { escapeHTML, escapeAttr } = WM.UI;
 
   // Bereken dagen voorraad resterend
   function daysRemaining(med) {
@@ -71,13 +72,20 @@ WM.Stock = (() => {
       if (orderDate) {
         const orderKey = toKey(orderDate);
         const todayKey = toKey(today);
+        let orderMethodTxt = '';
+        if (med.prescriber === 'huisarts') {
+          orderMethodTxt = ' Bel de huisarts.';
+        } else if (med.prescriber === 'specialist') {
+          orderMethodTxt = ' Bel de specialist.';
+        }
+
         if (orderKey < todayKey) {
-          orderMessage = 'Bestel vandaag nog! Uiterste besteldatum verstreken.';
+          orderMessage = 'Bel de huisarts/specialist vandaag nog! Uiterste besteldatum verstreken.';
           urgency = 'danger';
         } else if (orderKey === todayKey) {
-          orderMessage = 'Bestel vandaag voor tijdige levering.';
+          orderMessage = 'Bel vandaag de huisarts/specialist voor tijdige levering.';
         } else {
-          orderMessage = `Bestel uiterlijk op ${WM.UI.formatDate(orderKey, 'medium')}.`;
+          orderMessage = `Bel de huisarts/specialist uiterlijk op ${WM.UI.formatDate(orderKey, 'medium')}.`;
         }
       }
 
@@ -125,24 +133,31 @@ WM.Stock = (() => {
       </div>`;
   }
 
-  // Alarm-banner HTML
   function renderAlertBanner(alert) {
     const cls = alert.status === 'danger' ? 'danger' : '';
     const icon = alert.status === 'danger' ? '🚨' : '⚠️';
     const holidayText = alert.upcomingHolidays.length
       ? `<br><small>Feestdag(en) ingepland: ${alert.upcomingHolidays.join(', ')}</small>` : '';
 
+    const gpPhone = Contacts.get().gp.phone;
+    const callBtn = gpPhone 
+      ? `<button class="btn btn-sm btn-outline" style="margin-right: 4px;" onclick="event.stopPropagation(); window.location.href='tel:${WM.UI.safeTel(gpPhone)}'">📞 Huisarts/specialist bellen</button>`
+      : '';
+
     return `
       <div class="alert-banner ${cls}">
-        <span class="alert-icon" onclick="WM.Medications.editMedication('${alert.med.id}')">${icon}</span>
-        <div class="alert-text" onclick="WM.Medications.editMedication('${alert.med.id}')">
-          <div class="alert-title">${alert.med.name} — ${alert.message}</div>
+        <span class="alert-icon" onclick="WM.Medications.editMedication('${escapeAttr(alert.med.id)}')">${icon}</span>
+        <div class="alert-text" onclick="WM.Medications.editMedication('${escapeAttr(alert.med.id)}')">
+          <div class="alert-title">${escapeHTML(alert.med.name)} — ${escapeHTML(alert.message)}</div>
           <div class="alert-msg">${alert.orderMessage}${holidayText}</div>
         </div>
-        <button class="btn btn-sm btn-primary"
-            onclick="event.stopPropagation();WM.Medications.quickFillStock('${alert.med.id}')">
-          Bijvullen
-        </button>
+        <div style="display:flex;flex-wrap:wrap;justify-content:flex-end;">
+          ${callBtn}
+          <button class="btn btn-sm btn-primary"
+              onclick="event.stopPropagation();WM.Medications.quickFillStock('${escapeAttr(alert.med.id)}')">
+            Bijvullen
+          </button>
+        </div>
       </div>`;
   }
 

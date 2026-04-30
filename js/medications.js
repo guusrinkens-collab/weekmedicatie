@@ -5,7 +5,7 @@ window.WM = window.WM || {};
 
 WM.Medications = (() => {
   const { Medications: MData, Tapering: TData } = WM.Data;
-  const { openModal, closeModal, toast, confirmDialog, icon } = WM.UI;
+  const { openModal, closeModal, toast, confirmDialog, icon, escapeHTML, escapeAttr } = WM.UI;
 
   // ── Wizard & detail state ──────────────────────────────────
   let _wizard = {};
@@ -31,7 +31,13 @@ WM.Medications = (() => {
            ${icon('plus')} Medicijn toevoegen
          </button>`
       );
-    } else {
+        } else {
+      html += `
+        <div style="margin-bottom: 24px;">
+          <button class="btn btn-primary btn-full" style="display:flex; justify-content:center; align-items:center; gap:8px; background: var(--secondary); border-color: var(--secondary); box-shadow: 0 4px 12px rgba(0,0,0,0.1);" onclick="WM.App.navigate('weekdoosjes')">
+            <span style="font-size:1.2rem;">🗓️</span> <strong>Vulschema Weekdoos</strong>
+          </button>
+        </div>`;
       html += `<div class="section-title">Mijn medicijnen (${meds.length})</div>`;
       html += meds.map(med => renderMedCard(med)).join('');
       html += `
@@ -68,8 +74,8 @@ WM.Medications = (() => {
       <div class="med-card fade-in" onclick="WM.Medications.openDetail('${med.id}')">
         <div class="med-icon">💊</div>
         <div class="med-info">
-          <div class="med-name">${med.name}</div>
-          <div class="med-dosage">${med.dosage}</div>
+          <div class="med-name">${escapeHTML(med.name)}</div>
+          <div class="med-dosage">${escapeHTML(med.dosage)}</div>
           <div class="med-moments">${moments}</div>
           ${taperBadge}
         </div>
@@ -105,15 +111,15 @@ WM.Medications = (() => {
     return `
       <div class="subpage-header">
         ${WM.UI.backButton('medicatie')}
-        <h2 class="subpage-title">${med.name}</h2>
+        <h2 class="subpage-title">${escapeHTML(med.name)}</h2>
         <button class="btn btn-sm btn-outline" style="margin-left:auto;flex-shrink:0;"
                 onclick="WM.Medications.editMedication('${med.id}')">Bewerken</button>
       </div>
 
       <div class="med-detail-hero">
         <div class="med-detail-icon-wrap">💊</div>
-        <div class="med-detail-name">${med.name}</div>
-        <div class="med-detail-dosage">${med.dosage}</div>
+        <div class="med-detail-name">${escapeHTML(med.name)}</div>
+        <div class="med-detail-dosage">${escapeHTML(med.dosage)}</div>
         <div class="med-detail-moments">
           ${(med.moments || []).map(m =>
             `<span class="moment-pill ${m}">${momentLabels[m]}</span>`
@@ -136,6 +142,10 @@ WM.Medications = (() => {
         <div class="detail-row">
           <span class="detail-label">Dagelijks gebruik</span>
           <span class="detail-value">${med.dailyUsage || '—'} per dag</span>
+        </div>
+        <div class="detail-row">
+          <span class="detail-label">Bestellen via</span>
+          <span class="detail-value" style="text-transform: capitalize;">${med.prescriber === 'huisarts' ? 'Huisarts (telefonisch)' : (med.prescriber || 'Apotheek')}</span>
         </div>
         ${daysLeft !== null ? `
         <div class="detail-row">
@@ -252,13 +262,13 @@ WM.Medications = (() => {
         <div class="form-group">
           <label class="form-label">Naam medicijn <span class="required-star">*</span></label>
           <input type="text" name="name" class="form-input"
-                 value="${w.name || ''}" placeholder="bv. Metoprolol" autofocus>
+                 value="${escapeAttr(w.name || '')}" placeholder="bv. Metoprolol" autofocus>
         </div>
 
         <div class="form-group">
           <label class="form-label">Dosering <span class="required-star">*</span></label>
           <input type="text" name="dosage" class="form-input"
-                 value="${w.dosage || ''}" placeholder="bv. 50mg">
+                 value="${escapeAttr(w.dosage || '')}" placeholder="bv. 50mg">
         </div>
 
         <div class="form-group">
@@ -324,8 +334,8 @@ WM.Medications = (() => {
       <div class="wizard-summary-card">
         <span class="wizard-summary-icon">💊</span>
         <div>
-          <div class="wizard-summary-name">${w.name}</div>
-          <div class="wizard-summary-sub">${w.dosage} · ${(w.moments || []).map(m => momentNamen[m]).join(' · ')}</div>
+          <div class="wizard-summary-name">${escapeHTML(w.name)}</div>
+          <div class="wizard-summary-sub">${escapeHTML(w.dosage)} · ${(w.moments || []).map(m => momentNamen[m]).join(' · ')}</div>
         </div>
       </div>
 
@@ -336,7 +346,7 @@ WM.Medications = (() => {
           <div class="form-group">
             <label class="form-label">Pillen per inname</label>
             <input type="number" name="pillsPerDose" id="pills-per-dose" class="form-input"
-                   value="${defaultPills}" min="0.01" step="0.01"
+                   value="${defaultPills}" min="0.01" step="any"
                    oninput="WM.Medications.updateDailyUsageStap2()">
           </div>
           <div class="form-group">
@@ -350,8 +360,17 @@ WM.Medications = (() => {
         <div class="form-group">
           <label class="form-label">Gebruik per dag</label>
           <input type="number" name="dailyUsage" id="daily-usage-stap2" class="form-input"
-                 value="${defaultDaily}" min="0" step="0.01">
+                 value="${defaultDaily}" min="0" step="any">
           <p class="form-hint">Automatisch berekend · pas aan indien nodig</p>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Bestellen via</label>
+          <select name="prescriber" class="form-input">
+            <option value="apotheek" ${w.prescriber === 'apotheek' || !w.prescriber ? 'selected' : ''}>Apotheek</option>
+            <option value="huisarts" ${w.prescriber === 'huisarts' ? 'selected' : ''}>Huisarts (telefonisch)</option>
+            <option value="specialist" ${w.prescriber === 'specialist' ? 'selected' : ''}>Specialist</option>
+          </select>
         </div>
 
         <div class="form-group">
@@ -372,19 +391,19 @@ WM.Medications = (() => {
             <div class="form-group">
               <label class="form-label">Startdosis</label>
               <input type="number" name="taperStart" class="form-input"
-                     value="${w.taperStart || ''}" min="0" step="0.1" placeholder="bv. 20">
+                     value="${w.taperStart || ''}" min="0" step="any" placeholder="bv. 20">
             </div>
             <div class="form-group">
               <label class="form-label">Einddosis</label>
               <input type="number" name="taperEnd" class="form-input"
-                     value="${w.taperEnd || ''}" min="0" step="0.1" placeholder="bv. 0">
+                     value="${w.taperEnd || ''}" min="0" step="any" placeholder="bv. 0">
             </div>
           </div>
           <div class="form-row">
             <div class="form-group">
               <label class="form-label">Vermindering/stap</label>
               <input type="number" name="taperStep" class="form-input"
-                     value="${w.taperStep || ''}" min="0.01" step="0.01" placeholder="bv. 0.25">
+                     value="${w.taperStep || ''}" min="0.01" step="any" placeholder="bv. 0.25">
             </div>
             <div class="form-group">
               <label class="form-label">Interval (dagen)</label>
@@ -396,7 +415,7 @@ WM.Medications = (() => {
             <div class="form-group">
               <label class="form-label">Eenheid</label>
               <input type="text" name="taperUnit" class="form-input"
-                     value="${w.taperUnit || 'mg'}" placeholder="mg">
+                     value="${escapeAttr(w.taperUnit || 'mg')}" placeholder="mg">
             </div>
             <div class="form-group">
               <label class="form-label">Startdatum</label>
@@ -447,7 +466,8 @@ WM.Medications = (() => {
       pillsPerDose,
       stock,
       dailyUsage,
-      isTapering
+      isTapering,
+      prescriber: form.querySelector('[name=prescriber]')?.value || 'apotheek'
     });
     const medId = saved && saved.id;
 
@@ -483,13 +503,13 @@ WM.Medications = (() => {
         <div class="form-group">
           <label class="form-label">Naam medicijn *</label>
           <input type="text" name="name" class="form-input"
-                 value="${m.name || ''}" required placeholder="bv. Metoprolol">
+                 value="${escapeAttr(m.name || '')}" required placeholder="bv. Metoprolol">
         </div>
 
         <div class="form-group">
           <label class="form-label">Dosering *</label>
           <input type="text" name="dosage" class="form-input"
-                 value="${m.dosage || ''}" required placeholder="bv. 50mg">
+                 value="${escapeAttr(m.dosage || '')}" required placeholder="bv. 50mg">
         </div>
 
         <div class="form-group">
@@ -509,7 +529,7 @@ WM.Medications = (() => {
           <div class="form-group">
             <label class="form-label">Pillen per inname</label>
             <input type="number" name="pillsPerDose" class="form-input"
-                   value="${m.pillsPerDose || 1}" min="0.01" step="0.01">
+                   value="${m.pillsPerDose || 1}" min="0.01" step="any">
           </div>
           <div class="form-group">
             <label class="form-label">Huidige voorraad</label>
@@ -522,9 +542,18 @@ WM.Medications = (() => {
         <div class="form-group">
           <label class="form-label">Gebruik per dag (berekend)</label>
           <input type="number" name="dailyUsage" class="form-input" id="daily-usage-input"
-                 value="${m.dailyUsage || ''}" min="0" step="0.01"
+                 value="${m.dailyUsage || ''}" min="0" step="any"
                  placeholder="automatisch berekend">
           <p class="form-hint">Pillen per inname × aantal momenten</p>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Bestellen via</label>
+          <select name="prescriber" class="form-input">
+            <option value="apotheek" ${m.prescriber === 'apotheek' || !m.prescriber ? 'selected' : ''}>Apotheek</option>
+            <option value="huisarts" ${m.prescriber === 'huisarts' ? 'selected' : ''}>Huisarts (telefonisch)</option>
+            <option value="specialist" ${m.prescriber === 'specialist' ? 'selected' : ''}>Specialist</option>
+          </select>
         </div>
 
         <div class="form-group">
@@ -546,13 +575,13 @@ WM.Medications = (() => {
             <div class="form-group">
               <label class="form-label">Startdosis</label>
               <input type="number" name="taperStart" class="form-input"
-                     value="${tapering ? tapering.startDose : ''}" min="0" step="0.1"
+                     value="${tapering ? tapering.startDose : ''}" min="0" step="any"
                      placeholder="bv. 20">
             </div>
             <div class="form-group">
               <label class="form-label">Einddosis</label>
               <input type="number" name="taperEnd" class="form-input"
-                     value="${tapering ? tapering.endDose : ''}" min="0" step="0.1"
+                     value="${tapering ? tapering.endDose : ''}" min="0" step="any"
                      placeholder="bv. 0">
             </div>
           </div>
@@ -560,7 +589,7 @@ WM.Medications = (() => {
             <div class="form-group">
               <label class="form-label">Vermindering/stap</label>
               <input type="number" name="taperStep" class="form-input"
-                     value="${tapering ? tapering.reductionStep : ''}" min="0.01" step="0.01"
+                     value="${tapering ? tapering.reductionStep : ''}" min="0.01" step="any"
                      placeholder="bv. 0.25">
             </div>
             <div class="form-group">
@@ -574,7 +603,7 @@ WM.Medications = (() => {
             <div class="form-group">
               <label class="form-label">Eenheid</label>
               <input type="text" name="taperUnit" class="form-input"
-                     value="${tapering ? tapering.unit : 'mg'}" placeholder="mg">
+                     value="${escapeAttr(tapering ? tapering.unit : 'mg')}" placeholder="mg">
             </div>
             <div class="form-group">
               <label class="form-label">Startdatum</label>
@@ -727,16 +756,17 @@ WM.Medications = (() => {
       pillsPerDose,
       stock,
       dailyUsage,
-      isTapering
+      isTapering,
+      prescriber: data.prescriber || 'apotheek'
     };
-
-    const saved = MData.save(medData);
-    const medId = existingId || (saved && saved.id);
 
     if (isTapering && (!data.taperStart || !data.taperEnd || !data.taperStep || !data.taperInterval)) {
       toast('Vul alle afbouwvelden in of zet het schema uit', 'warning');
       return;
     }
+
+    const saved = MData.save(medData);
+    const medId = existingId || (saved && saved.id);
 
     if (isTapering && data.taperStart && data.taperEnd && data.taperStep && data.taperInterval) {
       const existing = TData.forMedication(medId);

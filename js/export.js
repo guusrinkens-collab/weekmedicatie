@@ -5,7 +5,7 @@ window.WM = window.WM || {};
 
 WM.Export = (() => {
   const { Medications, Schedule: SData, Wellbeing: WData, Contacts: CData } = WM.Data;
-  const { formatDate } = WM.UI;
+  const { formatDate, escapeHTML } = WM.UI;
 
   const MOMENTS = [
     { key: 'ochtend', label: '☀️ Ochtend' },
@@ -96,7 +96,7 @@ WM.Export = (() => {
       });
 
       medsForMoment.forEach(med => {
-        html += `<div class="week-cell week-med-label">${med.name}<br><span class="moment-label">${med.dosage}</span></div>`;
+        html += `<div class="week-cell week-med-label">${escapeHTML(med.name)}<br><span class="moment-label">${escapeHTML(med.dosage)}</span></div>`;
         weekDays.forEach(d => {
           const dateKey = d.toISOString().slice(0, 10);
           const dayData = SData.getDay(dateKey);
@@ -127,8 +127,8 @@ WM.Export = (() => {
       const momentLabels = (med.moments || []).map(m => ({ ochtend: 'ocht.', middag: 'midd.', avond: 'av.' }[m])).join(', ');
       html += `
         <div class="med-row">
-          <span><strong>${med.name}</strong></span>
-          <span>${med.dosage}</span>
+          <span><strong>${escapeHTML(med.name)}</strong></span>
+          <span>${escapeHTML(med.dosage)}</span>
           <span>${momentLabels}</span>
           <span>${med.dailyUsage || '–'}</span>
           <span class="${stockCls}">${med.stock ?? '–'}</span>
@@ -144,18 +144,18 @@ WM.Export = (() => {
       if (contacts.gp?.name) {
         html += `<div class="contact-box">
           <div class="contact-type">Huisarts</div>
-          <div class="contact-name">${contacts.gp.name}</div>
-          ${contacts.gp.phone ? `<div class="contact-detail">📞 ${contacts.gp.phone}</div>` : ''}
-          ${contacts.gp.address ? `<div class="contact-detail">📍 ${contacts.gp.address}</div>` : ''}
+          <div class="contact-name">${escapeHTML(contacts.gp.name)}</div>
+          ${contacts.gp.phone ? `<div class="contact-detail">📞 ${escapeHTML(contacts.gp.phone)}</div>` : ''}
+          ${contacts.gp.address ? `<div class="contact-detail">📍 ${escapeHTML(contacts.gp.address)}</div>` : ''}
         </div>`;
       }
       if (contacts.pharmacy?.name) {
         html += `<div class="contact-box">
           <div class="contact-type">Apotheek</div>
-          <div class="contact-name">${contacts.pharmacy.name}</div>
-          ${contacts.pharmacy.phone ? `<div class="contact-detail">📞 ${contacts.pharmacy.phone}</div>` : ''}
-          ${contacts.pharmacy.address ? `<div class="contact-detail">📍 ${contacts.pharmacy.address}</div>` : ''}
-          ${contacts.pharmacy.openingHours ? `<div class="contact-detail">🕐 ${contacts.pharmacy.openingHours}</div>` : ''}
+          <div class="contact-name">${escapeHTML(contacts.pharmacy.name)}</div>
+          ${contacts.pharmacy.phone ? `<div class="contact-detail">📞 ${escapeHTML(contacts.pharmacy.phone)}</div>` : ''}
+          ${contacts.pharmacy.address ? `<div class="contact-detail">📍 ${escapeHTML(contacts.pharmacy.address)}</div>` : ''}
+          ${contacts.pharmacy.openingHours ? `<div class="contact-detail">🕐 ${escapeHTML(contacts.pharmacy.openingHours)}</div>` : ''}
         </div>`;
       }
       html += `</div>`;

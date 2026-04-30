@@ -4,6 +4,7 @@
 window.WM = window.WM || {};
 
 WM.App = (() => {
+  const { escapeAttr } = WM.UI;
   // ── Paginadefinities ──────────────────────────────────────
   const PAGES = {
     vandaag:          { render: () => WM.Schedule.render(),           title: 'Vandaag',            navKey: 'vandaag' },
@@ -107,7 +108,7 @@ WM.App = (() => {
         <div class="form-group">
           <label class="form-label">API-sleutel</label>
           <input type="password" id="api-key-input" class="form-input"
-                 value="${settings.apiKey || ''}"
+                 value="${escapeAttr(settings.apiKey || '')}"
                  placeholder="sk-ant-api03-…"
                  autocomplete="new-password">
         </div>

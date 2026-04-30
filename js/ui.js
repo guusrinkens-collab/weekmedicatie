@@ -4,6 +4,29 @@
 window.WM = window.WM || {};
 
 WM.UI = (() => {
+  function escapeHTML(value) {
+    return String(value ?? '').replace(/[&<>"']/g, ch => ({
+      '&': '&amp;',
+      '<': '&lt;',
+      '>': '&gt;',
+      '"': '&quot;',
+      "'": '&#39;'
+    }[ch]));
+  }
+
+  function escapeAttr(value) {
+    return escapeHTML(value);
+  }
+
+  function safeTel(value) {
+    return String(value ?? '').replace(/[^\d+()[\]\s.-]/g, '').trim();
+  }
+
+  function safeEmail(value) {
+    const email = String(value ?? '').trim();
+    return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email) ? email : '';
+  }
+
   // ── Toast-notificaties ────────────────────────────────────
   function toast(message, type = 'info', duration = 3000) {
     const container = document.getElementById('toast-container');
@@ -11,7 +34,7 @@ WM.UI = (() => {
     const t = document.createElement('div');
     t.className = `toast toast-${type}`;
     const icons = { success: '✓', error: '✕', warning: '⚠', info: 'ℹ' };
-    t.innerHTML = `<span class="toast-icon">${icons[type] || 'ℹ'}</span><span>${message}</span>`;
+    t.innerHTML = `<span class="toast-icon">${icons[type] || 'ℹ'}</span><span>${escapeHTML(message)}</span>`;
     container.appendChild(t);
     requestAnimationFrame(() => t.classList.add('toast-show'));
     setTimeout(() => {
@@ -65,7 +88,7 @@ WM.UI = (() => {
   function confirmDialog(message, onConfirm, onCancel) {
     const html = `
       <div class="confirm-dialog">
-        <p>${message}</p>
+        <p>${escapeHTML(message)}</p>
         <div class="confirm-actions">
           <button class="btn btn-outline" id="confirm-cancel">Annuleren</button>
           <button class="btn btn-danger" id="confirm-ok">Bevestigen</button>
@@ -84,7 +107,7 @@ WM.UI = (() => {
     if (!el) {
       el = document.createElement('div');
       el.id = 'global-loader';
-      el.innerHTML = `<div class="loader-spinner"></div><p>${message}</p>`;
+      el.innerHTML = `<div class="loader-spinner"></div><p>${escapeHTML(message)}</p>`;
       document.body.appendChild(el);
     } else {
       el.querySelector('p').textContent = message;
@@ -195,11 +218,11 @@ WM.UI = (() => {
     return `
       <div class="empty-state">
         <div class="empty-icon">💊</div>
-        <p class="empty-msg">${msg}</p>
-        ${subMsg ? `<p class="empty-sub">${subMsg}</p>` : ''}
+        <p class="empty-msg">${escapeHTML(msg)}</p>
+        ${subMsg ? `<p class="empty-sub">${escapeHTML(subMsg)}</p>` : ''}
         ${actionHTML}
       </div>`;
   }
 
-  return { toast, openModal, closeModal, confirmDialog, showLoader, hideLoader, getFormData, fillForm, formatDate, formatRelativeDate, icon, backButton, emptyState, ICONS };
+  return { toast, openModal, closeModal, confirmDialog, showLoader, hideLoader, getFormData, fillForm, formatDate, formatRelativeDate, icon, backButton, emptyState, escapeHTML, escapeAttr, safeTel, safeEmail, ICONS };
 })();

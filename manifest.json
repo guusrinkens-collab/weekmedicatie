@@ -2,7 +2,8 @@
   "name": "Weekmedicatie",
   "short_name": "Medicatie",
   "description": "Dagelijks medicatiebeheer met voorraad en afbouwschema's",
-  "start_url": "/",
+  "start_url": ".",
+  "scope": ".",
   "display": "standalone",
   "background_color": "#1a1a2e",
   "theme_color": "#6c63ff",
@@ -10,18 +11,21 @@
   "lang": "nl",
   "icons": [
     {
-      "src": "icons/app-icon.jpg",
+      "src": "icons/new-icon.jpg",
       "sizes": "512x512",
       "type": "image/jpeg",
-      "purpose": "any"
+      "purpose": "any maskable"
     },
     {
-      "src": "icons/app-icon.jpg",
+      "src": "icons/new-icon.jpg",
       "sizes": "192x192",
       "type": "image/jpeg",
-      "purpose": "maskable"
+      "purpose": "any"
     }
   ],
-  "categories": ["health", "medical"],
+  "categories": [
+    "health",
+    "medical"
+  ],
   "screenshots": []
 }

@@ -6,6 +6,7 @@ window.WM = window.WM || {};
 WM.Camera = (() => {
   const { Settings } = WM.Data;
   const { toast, showLoader, hideLoader, openModal, closeModal } = WM.UI;
+  const { escapeHTML, escapeAttr } = WM.UI;
 
   // ── Scanner openen ────────────────────────────────────────
   function openScanner(medId = null) {
@@ -30,7 +31,8 @@ WM.Camera = (() => {
                style="display:none;" onchange="WM.Camera.handleImage(event, '${medId || ''}')">
 
         <p class="form-hint" style="margin-top:16px;">
-          Zorg voor goede belichting en houd het label recht.
+          Zorg voor goede belichting en houd het label recht.<br><br>
+          <strong>Tip:</strong> Bij een doorschijnend etiket helpt het vaak om de flitser te vermijden, het doosje iets schuin te houden voor de foto, of (indien mogelijk) even een wit papiertje tussen het etiket en het doosje te schuiven.
         </p>
 
         <div id="scan-preview" style="display:none;margin-top:16px;">
@@ -96,7 +98,7 @@ WM.Camera = (() => {
 
 BELANGRIJK — welke tekst lezen:
 - Lees ALLEEN de tekst op het apothekerlabel op de voorgrond (het witte of gekleurde stickerlabel van de apotheek).
-- Negeer tekst die zichtbaar is door het label heen van de verpakking eronder (fabrikantsnaam, barcode, achtergrondtekst).
+- FOCUS OP DE VOORGROND: Negeer ALLE tekst die "dubbel", "schaduwachtig" of "doorschijnend" lijkt van de originele verpakking eronder. Het apothekerslabel (vaak een witte sticker) is ALTIJD leidend.
 - Bij overlappende of gedeeltelijk zichtbare tekst: gebruik de meest leesbare versie en noteer twijfel in het "warning"-veld.
 - Bij laag contrast of onduidelijk beeld: doe je best en geef confidence "low" mee.
 
@@ -185,7 +187,7 @@ Regels:
     const rowsHTML = rows.map(r => `
       <div class="scan-row">
         <span class="scan-row-label">${r.label}</span>
-        <span class="scan-row-value">${r.value}</span>
+        <span class="scan-row-value">${escapeHTML(r.value)}</span>
       </div>`).join('');
 
     const needsVerification = result.confidence === 'low' || result.warning;
@@ -193,7 +195,7 @@ Regels:
     const warningBanner = needsVerification ? `
       <div class="scan-warning-banner">
         <span class="scan-warning-icon">⚠️</span>
-        <span>${warningText}</span>
+        <span>${escapeHTML(warningText)}</span>
       </div>` : '';
 
     const confidenceBadge = result.confidence ? `
@@ -202,7 +204,7 @@ Regels:
       </span>` : '';
 
     const existingMeds = WM.Data.Medications.all();
-    const resultJSON = JSON.stringify(result).replace(/"/g, '&quot;');
+    const resultJSON = escapeAttr(JSON.stringify(result));
 
     const stockBtn = existingMeds.length > 0 && result.package_quantity
       ? `<button class="btn btn-outline btn-full" style="margin-top:10px;"
@@ -233,7 +235,7 @@ Regels:
   function openStockRefill(result) {
     const meds = WM.Data.Medications.all();
     const options = meds.map(m =>
-      `<option value="${m.id}">${m.name} — ${m.dosage} (nu: ${m.stock ?? '?'})</option>`
+      `<option value="${escapeAttr(m.id)}">${escapeHTML(m.name)} — ${escapeHTML(m.dosage)} (nu: ${escapeHTML(m.stock ?? '?')})</option>`
     ).join('');
 
     closeModal();
@@ -242,7 +244,7 @@ Regels:
         <div>
           <div class="scan-row" style="margin-bottom:16px;">
             <span class="scan-row-label">Gescand</span>
-            <span class="scan-row-value">${result.name || '?'}${result.quantity ? ' — ' + result.quantity + ' st.' : ''}</span>
+            <span class="scan-row-value">${escapeHTML(result.medication_name || '?')}${result.package_quantity ? ' — ' + escapeHTML(result.package_quantity) + ' st.' : ''}</span>
           </div>
           <div class="form-group">
             <label class="form-label">Kies medicijn</label>
@@ -251,7 +253,7 @@ Regels:
           <div class="form-group">
             <label class="form-label">Aantal toe te voegen</label>
             <input type="number" class="form-input" id="stock-add-amount"
-                   value="${result.quantity || ''}" min="1" step="1" placeholder="aantal pillen">
+                   value="${escapeAttr(result.package_quantity || '')}" min="1" step="1" placeholder="aantal pillen">
           </div>
           <button class="btn btn-primary btn-full" onclick="WM.Camera.confirmStockRefill()">
             ✓ Bijvullen
@@ -283,7 +285,7 @@ Regels:
       if (medId && medId !== 'null' && medId !== '') {
         WM.Medications.editMedication(medId);
       } else {
-        WM.Medications.addMedication();
+        WM.Medications.startAddFlow();
       }
       setTimeout(() => {
         WM.Medications.prefillForm(mapped);

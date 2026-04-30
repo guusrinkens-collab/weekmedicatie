@@ -5,7 +5,7 @@ window.WM = window.WM || {};
 
 WM.Schedule = (() => {
   const { Schedule: SData, Medications } = WM.Data;
-  const { formatDate, toast } = WM.UI;
+  const { formatDate, toast, escapeHTML, escapeAttr } = WM.UI;
 
   const MOMENTS = [
     { key: 'ochtend', label: 'Ochtend', emoji: '☀️' },
@@ -96,13 +96,13 @@ WM.Schedule = (() => {
         const taperInfo = WM.Tapering.inlineStatus(med);
 
         html += `
-          <div class="intake-card ${taken ? 'taken' : ''}" id="intake-${moment.key}-${med.id}" onclick="WM.Schedule.toggleIntake('${moment.key}', '${med.id}')">
+          <div class="intake-card ${taken ? 'taken' : ''}" id="intake-${escapeAttr(moment.key)}-${escapeAttr(med.id)}" onclick="WM.Schedule.toggleIntake('${escapeAttr(moment.key)}', '${escapeAttr(med.id)}')">
             <div class="intake-check">
               ${taken ? WM.UI.icon('check') : ''}
             </div>
             <div style="flex:1;min-width:0;">
-              <div class="intake-name">${med.name}</div>
-              <div class="intake-dosage">${med.dosage}${med.pillsPerDose > 1 ? ` · ${med.pillsPerDose}x` : ''}</div>
+              <div class="intake-name">${escapeHTML(med.name)}</div>
+              <div class="intake-dosage">${escapeHTML(med.dosage)}${med.pillsPerDose > 1 ? ` · ${escapeHTML(med.pillsPerDose)}x` : ''}</div>
               ${taperInfo}
             </div>
             <div class="intake-meta">

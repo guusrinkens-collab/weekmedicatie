@@ -5,7 +5,7 @@ window.WM = window.WM || {};
 
 WM.Wellbeing = (() => {
   const { Wellbeing: WData } = WM.Data;
-  const { toast, backButton } = WM.UI;
+  const { toast, backButton, escapeHTML } = WM.UI;
 
   const MOODS = [
     { val: 1, emoji: '😞', label: 'Slecht' },
@@ -47,7 +47,7 @@ WM.Wellbeing = (() => {
 
         <div class="form-group">
           <label class="form-label">Notitie (optioneel)</label>
-          <textarea id="wellbeing-note" class="form-textarea" placeholder="Hoe gaat het? Bijwerkingen, opmerkingen…">${existing ? (existing.note || '') : ''}</textarea>
+          <textarea id="wellbeing-note" class="form-textarea" placeholder="Hoe gaat het? Bijwerkingen, opmerkingen…">${existing ? escapeHTML(existing.note || '') : ''}</textarea>
         </div>
 
         <button class="btn btn-primary btn-full" onclick="WM.Wellbeing.saveEntry()">
@@ -71,7 +71,7 @@ WM.Wellbeing = (() => {
             <span style="font-size:1.5rem;">${mood ? mood.emoji : '❓'}</span>
             <div style="flex:1;">
               <div style="font-weight:600;font-size:0.85rem;">${isToday ? 'Vandaag' : WM.UI.formatDate(date, 'medium')}</div>
-              ${entry.note ? `<div style="font-size:0.8rem;color:var(--text-muted);">${entry.note}</div>` : ''}
+              ${entry.note ? `<div style="font-size:0.8rem;color:var(--text-muted);">${escapeHTML(entry.note)}</div>` : ''}
             </div>
             <span class="badge badge-${entry.mood >= 4 ? 'success' : entry.mood <= 2 ? 'danger' : 'info'}">${mood ? mood.label : '–'}</span>
           </div>`;

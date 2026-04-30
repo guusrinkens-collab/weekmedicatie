@@ -5,7 +5,7 @@ window.WM = window.WM || {};
 
 WM.History = (() => {
   const { Schedule: SData, Medications, Wellbeing: WData } = WM.Data;
-  const { formatDate, backButton } = WM.UI;
+  const { formatDate, backButton, escapeHTML } = WM.UI;
 
   const MOMENTS = ['ochtend', 'middag', 'avond'];
   const MOOD_EMOJIS = ['', '😞', '😕', '😐', '😊', '😄'];
@@ -82,7 +82,7 @@ WM.History = (() => {
             <span style="font-size:2rem;">${moodEmoji}</span>
             <div>
               <div style="font-weight:700;">Welzijn ${isToday ? 'vandaag' : 'die dag'}</div>
-              ${wb.note ? `<div style="font-size:0.85rem;color:var(--text-muted);">${wb.note}</div>` : ''}
+              ${wb.note ? `<div style="font-size:0.85rem;color:var(--text-muted);">${escapeHTML(wb.note)}</div>` : ''}
             </div>
           </div>
         </div>`;
@@ -106,8 +106,8 @@ WM.History = (() => {
               ${intake.taken ? WM.UI.icon('check') : ''}
             </div>
             <div style="flex:1;">
-              <div class="intake-name">${med.name}</div>
-              <div class="intake-dosage">${med.dosage}</div>
+              <div class="intake-name">${escapeHTML(med.name)}</div>
+              <div class="intake-dosage">${escapeHTML(med.dosage)}</div>
             </div>
             <div class="intake-meta">
               ${intake.taken

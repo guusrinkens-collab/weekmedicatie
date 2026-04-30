@@ -46,6 +46,7 @@ body {
   user-select: none;
 }
 input, textarea, select, button { font-family: inherit; font-size: inherit; }
+input, textarea, select { user-select: text; }
 a { color: var(--primary-light); text-decoration: none; }
 
 /* ── App Shell ───────────────────────────────────────────── */

@@ -1,10 +1,13 @@
-const CACHE_NAME = 'weekmedicatie-v13';
+const CACHE_NAME = 'weekmedicatie-v14';
 const BASE = self.registration.scope;
 const ASSETS = [
   BASE,
   BASE + 'index.html',
   BASE + 'manifest.json',
   BASE + 'icons/app-icon.jpg',
+  BASE + 'icons/icon.svg',
+  BASE + 'icons/icon-192.png',
+  BASE + 'icons/icon-512.png',
   BASE + 'assets/welcome.png',
   BASE + 'css/style.css',
   BASE + 'js/data.js',
@@ -46,6 +49,7 @@ self.addEventListener('activate', e => {
 });
 
 self.addEventListener('fetch', e => {
+  if (e.request.method !== 'GET') return;
   if (e.request.url.includes('anthropic.com')) return;
 
   e.respondWith(
@@ -56,7 +60,10 @@ self.addEventListener('fetch', e => {
         const clone = response.clone();
         caches.open(CACHE_NAME).then(cache => cache.put(e.request, clone));
         return response;
-      }).catch(() => caches.match(BASE + 'index.html'));
+      }).catch(() => {
+        if (e.request.mode === 'navigate') return caches.match(BASE + 'index.html');
+        return caches.match(e.request);
+      });
     })
   );
 });

@@ -5,7 +5,7 @@ window.WM = window.WM || {};
 
 WM.Tapering = (() => {
   const { Tapering: TData, Medications } = WM.Data;
-  const { openModal, closeModal, toast, formatDate, formatRelativeDate, backButton } = WM.UI;
+  const { openModal, closeModal, toast, formatDate, formatRelativeDate, backButton, escapeHTML, escapeAttr } = WM.UI;
 
   // ── Pagina renderen ───────────────────────────────────────
   function render() {
@@ -52,8 +52,8 @@ WM.Tapering = (() => {
       <div class="tapering-card fade-in">
         <div class="card-header">
           <div>
-            <div class="card-title">${med.name}</div>
-            <div class="card-subtitle">${med.dosage}</div>
+            <div class="card-title">${escapeHTML(med.name)}</div>
+            <div class="card-subtitle">${escapeHTML(med.dosage)}</div>
           </div>
           <div style="display:flex;gap:8px;align-items:center;">
             ${isComplete
@@ -115,7 +115,7 @@ WM.Tapering = (() => {
     const t = tapering || {};
     const meds = Medications.all();
     const medOptions = meds.map(m =>
-      `<option value="${m.id}" ${(t.medicationId || medId) === m.id ? 'selected' : ''}>${m.name} (${m.dosage})</option>`
+      `<option value="${escapeAttr(m.id)}" ${(t.medicationId || medId) === m.id ? 'selected' : ''}>${escapeHTML(m.name)} (${escapeHTML(m.dosage)})</option>`
     ).join('');
 
     return `
@@ -150,7 +150,7 @@ WM.Tapering = (() => {
         <div class="form-row">
           <div class="form-group">
             <label class="form-label">Eenheid</label>
-            <input type="text" name="unit" class="form-input" value="${t.unit || 'mg'}" placeholder="mg">
+            <input type="text" name="unit" class="form-input" value="${escapeAttr(t.unit || 'mg')}" placeholder="mg">
           </div>
           <div class="form-group">
             <label class="form-label">Startdatum</label>
@@ -247,7 +247,7 @@ WM.Tapering = (() => {
     return `
       <div style="margin-top:6px;padding:6px 10px;background:rgba(108,99,255,0.1);border-radius:6px;font-size:0.75rem;">
         <span style="color:var(--primary-light);">⬇ Afbouw: </span>
-        <strong>${dose}${t.unit}</strong>
+        <strong>${escapeHTML(dose)}${escapeHTML(t.unit)}</strong>
         ${next ? `<span style="color:var(--text-muted);"> · volgende stap ${WM.UI.formatRelativeDate(next.toISOString().slice(0,10))}</span>` : ''}
       </div>`;
   }

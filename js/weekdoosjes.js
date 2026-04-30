@@ -5,7 +5,7 @@ window.WM = window.WM || {};
 
 WM.Weekdoosjes = (() => {
   const { Medications, Tapering: TData } = WM.Data;
-  const { backButton } = WM.UI;
+  const { backButton, escapeHTML } = WM.UI;
 
   const MOMENTS = [
     { key: 'ochtend', label: 'Ochtend', emoji: '☀️' },
@@ -109,8 +109,8 @@ WM.Weekdoosjes = (() => {
           }
           html += `
                   <div class="weekdoos-pill">
-                    <span class="weekdoos-pill-name">${med.name}</span>
-                    <span class="weekdoos-pill-count">${countLabel}</span>
+                    <span class="weekdoos-pill-name">${escapeHTML(med.name)}</span>
+                    <span class="weekdoos-pill-count">${escapeHTML(countLabel)}</span>
                   </div>`;
         });
 

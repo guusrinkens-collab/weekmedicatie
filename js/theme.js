@@ -5,7 +5,7 @@ window.WM = window.WM || {};
 
 WM.Theme = (() => {
   const { Theme: TData } = WM.Data;
-  const { toast, backButton } = WM.UI;
+  const { toast, backButton, escapeHTML } = WM.UI;
 
   const BUILTIN_THEMES = [
     {
@@ -161,7 +161,7 @@ WM.Theme = (() => {
       <div class="theme-card ${isActive ? 'active' : ''}"
            style="background:${grad};"
            onclick="WM.Theme.selectTheme('${theme.id}')">
-        <div class="theme-name">${theme.name}</div>
+        <div class="theme-name">${escapeHTML(theme.name)}</div>
         <div class="theme-colors">
           <div class="theme-swatch" style="background:${theme.primary};"></div>
           <div class="theme-swatch" style="background:${theme.secondary};"></div>
@@ -178,7 +178,7 @@ WM.Theme = (() => {
            onclick="WM.Theme.selectTheme('${theme.id}', true)">
         <button onclick="event.stopPropagation();WM.Theme.deleteCustomTheme('${theme.id}')"
                 style="position:absolute;top:6px;right:6px;background:rgba(0,0,0,0.4);border:none;color:white;border-radius:50%;width:22px;height:22px;cursor:pointer;font-size:0.8rem;">✕</button>
-        <div class="theme-name">${theme.name}</div>
+        <div class="theme-name">${escapeHTML(theme.name)}</div>
         <div class="theme-colors">
           <div class="theme-swatch" style="background:${theme.primary};"></div>
           <div class="theme-swatch" style="background:${theme.secondary};"></div>
