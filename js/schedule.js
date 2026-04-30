@@ -119,7 +119,8 @@ WM.Schedule = (() => {
       html += WM.UI.emptyState(
         'Geen medicijnen ingepland',
         'Voeg medicijnen toe via de Medicatie-tab.',
-        `<button class="btn btn-primary" onclick="WM.App.navigate('medicatie')">Medicatie beheren</button>`
+        `<button class="btn btn-primary" onclick="WM.App.navigate('medicatie')">Medicatie beheren</button>`,
+        { useImage: true }
       );
     }
 

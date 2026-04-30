@@ -1,4 +1,4 @@
-const CACHE_NAME = 'weekmedicatie-v14';
+const CACHE_NAME = 'weekmedicatie-v15';
 const BASE = self.registration.scope;
 const ASSETS = [
   BASE,
@@ -9,6 +9,7 @@ const ASSETS = [
   BASE + 'icons/icon-192.png',
   BASE + 'icons/icon-512.png',
   BASE + 'assets/welcome.png',
+  BASE + 'assets/pill-sunset.png',
   BASE + 'css/style.css',
   BASE + 'js/data.js',
   BASE + 'js/holidays.js',

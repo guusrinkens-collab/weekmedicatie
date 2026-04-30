@@ -214,10 +214,27 @@ WM.UI = (() => {
   }
 
   // ── Lege-staat component ──────────────────────────────────
-  function emptyState(msg, subMsg = '', actionHTML = '') {
+  function emptyState(msg, subMsg = '', actionHTML = '', options = {}) {
+    let iconHTML = `<div class="empty-icon">💊</div>`;
+    
+    if (options.useImage) {
+      const today = new Date();
+      const day = today.getDate();
+      const month = today.toLocaleString('nl-NL', { month: 'short' }).toUpperCase();
+      iconHTML = `
+        <div class="empty-image-container">
+          <img src="assets/pill-sunset.png" alt="Geen medicatie" class="empty-bg-img" />
+          <div class="empty-dynamic-calendar">
+            <div class="cal-month">${month}</div>
+            <div class="cal-day">${day}</div>
+          </div>
+        </div>
+      `;
+    }
+
     return `
       <div class="empty-state">
-        <div class="empty-icon">💊</div>
+        ${iconHTML}
         <p class="empty-msg">${escapeHTML(msg)}</p>
         ${subMsg ? `<p class="empty-sub">${escapeHTML(subMsg)}</p>` : ''}
         ${actionHTML}
